@@ -60,8 +60,8 @@ class HelpScreen(Screen):
 
     def __init__(self, **kwargs):
         super(HelpScreen, self).__init__(**kwargs)
-        # EventLoop.window.bind(on_keyboard=self.on_key)
-        lambda x: Window.bind(on_keyboard=self.on_key)
+        EventLoop.window.bind(on_keyboard=self.on_key)
+        # lambda x: Window.bind(on_keyboard=self.on_key)
 
     def on_key(self, window, key, scancode, codepoint, modifier):
         # 27 is the key code for the back button on Android
