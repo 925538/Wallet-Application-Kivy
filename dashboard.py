@@ -1584,13 +1584,13 @@ class DashBoardScreen(Screen):
         sm = self.manager
 
         # Create a new instance of the screen for adding money
-        add_money_screen = Factory.WalletScreen(name='WalletScreen')
+        add_money_screen = Factory.AddMoneyScreen(name='addmoney')
 
         # Add the screen for adding money to the existing ScreenManager
         sm.add_widget(add_money_screen)
 
         # Switch to the screen for adding money
-        sm.current = 'WalletScreen'
+        sm.current = 'addmoney'
 
     def bank_account(self):
         # Create a modal view for the loading animation

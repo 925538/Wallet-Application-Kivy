@@ -16,7 +16,7 @@ kv_string = '''
             md_bg_color:1,1,1,1
             specific_text_color:1/255, 26/255, 51/255, 1
             elevation:0
-            left_action_items: [['arrow-left', lambda x: root.profile()]]
+            left_action_items: [['arrow-left', lambda x: root.go_back()]]
             
             pos_hint: {'center_x': 0.5, 'center_y': 0.96}
         
