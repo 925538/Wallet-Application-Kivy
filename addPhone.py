@@ -148,7 +148,7 @@ KV = '''
 
                 MDFillRoundFlatButton:
                     text: 'Pay'
-                    #on_release: root.deduct_and_transfer(root.ids.my_text_field.text) 
+                    on_release: root.deduct_and_transfer(root.ids.my_text_field.text) 
                     size_hint_x: None
                     width: "150dp"
                     height: "300dp"
@@ -293,7 +293,8 @@ class UserDetailsScreen(Screen):
     def on_enter(self, sender=None):
         # Convert phone numbers to integers
         global message, color, align
-        current_user_phone = JsonStore('user_data.json').get('user')['value']['phone']
+        current_user_phone1 = JsonStore('user_data.json').get('user')['value']['phone']
+        self.current_user_phone = current_user_phone1
         print(f'current_user_phone:{self.current_user_phone}')
         searched_user_phone = int(self.searched_user_phone)
         print(f'searched_user_phone:{self.searched_user_phone}')
@@ -301,11 +302,11 @@ class UserDetailsScreen(Screen):
         # Get the transaction data between current and searched users
         user_data_1 = app_tables.wallet_users_transaction.search(
             phone=searched_user_phone,
-            receiver_phone=current_user_phone,
+            receiver_phone=current_user_phone1,
             transaction_type='Debit'
         )
         user_data_2 = app_tables.wallet_users_transaction.search(
-            phone=current_user_phone,
+            phone=current_user_phone1,
             receiver_phone=searched_user_phone,
             transaction_type='Debit'
         )
@@ -357,7 +358,7 @@ class UserDetailsScreen(Screen):
             color = (0, 0, 0, 1)
 
             # Determine the direction of the message based on sender and receiver
-            if sender == current_user_phone:
+            if sender == current_user_phone1:
                 formatted_fund = "{:,.0f}".format(fund)
                 message = f"Payment to {searched_username}\n" \
                           f"₹{fund}\n" \
@@ -493,7 +494,7 @@ class UserDetailsScreen(Screen):
                     # Show a success toast
                     toast("Money added successfully.")
                     self.manager.current = 'dashboard'
-                    self.manager.show_balance()
+                    # self.manager.show_balance()
                 else:
                     print("Error: More than one row matched for searched user")
         else:

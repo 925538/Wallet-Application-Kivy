@@ -29,7 +29,7 @@ Builder.load_string(
             padding: dp(10)
             spacing: dp(10)
             size_hint_y:0.9
-            pos_hint: {"top":0.95}
+            pos_hint: {"top":0.9}
             #md_bg_color: "#fe1616"
             MDBoxLayout:
                 orientation: 'vertical'
@@ -424,8 +424,9 @@ class WithdrawScreen(Screen):
         #users data
         
         users_default_account = user_data['default_account']
-        ban_name = app_tables.wallet_users_account.get(account_number=float(users_default_account))
-        if ban_name:
-            bank_name = ban_name['bank_name']
-            self.ids.bank_dropdown.text = bank_name
-            self.test(bank_name)
+        if users_default_account:
+            ban_name = app_tables.wallet_users_account.get(account_number=float(users_default_account))
+            if ban_name:
+                bank_name = ban_name['bank_name']
+                self.ids.bank_dropdown.text = bank_name
+                self.test(bank_name)

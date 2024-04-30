@@ -161,7 +161,7 @@ class TransferScreen(Screen):
         box = BoxLayout(orientation='vertical')
 
         dropdown = DropDown()
-        currencies = ['INR', 'USD', 'EUROS', 'POUND']
+        currencies = ['INR', 'USD', 'EUR', 'GBP']
         for currency in currencies:
             btn = Button(text=currency, size_hint_y=None, height=44)
             btn.bind(on_release=lambda btn: dropdown.select(btn.text))
@@ -315,7 +315,7 @@ class TransferScreen(Screen):
         return app_tables.wallet_users.get(phone=phone)
 
     def show_currency_menu(self):
-        currencies = ['INR', 'USD', 'EUROS', 'POUND']
+        currencies = ['INR', 'USD', 'EUR', 'GBP']
         menu_items = [{"text": currency, "viewclass": "OneLineListItem", "height": dp(44),
                        "on_release": lambda x=currency: self.test(x)} for currency in currencies]
 
