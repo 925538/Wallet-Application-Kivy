@@ -184,7 +184,7 @@ class PayScreen(MDScreen):
 
 class SelftransferScreen(Screen):
     def go_back(self):
-        self.manager.current = 'dashboard'
+        self.manager.current = 'dashboard' 
 
     def __init__(self, **kwargs):
         super(SelftransferScreen, self).__init__(**kwargs)
