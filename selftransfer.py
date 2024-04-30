@@ -141,7 +141,7 @@ class PayScreen(MDScreen):
     receiver_account = ""
 
     def go_back(self):
-        self.manager.current = 'selftransfer'
+        self.manager.current = 'dashboard'
 
     def __init__(self, **kwargs):
         super(PayScreen, self).__init__(**kwargs)
