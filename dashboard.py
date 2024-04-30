@@ -44,7 +44,7 @@ from checkbalance import BalanceScreen
 from selftransfer import SelftransferScreen
 from referfriend import ReferFriendScreen
 from autotopup import AutoTopupScreen
-#from qrscanner import ScanScreen
+from qrscanner import ScanScreen
 from newQR import QRCodeScreen
 from kivy.core.image import  Image as CoreImage
 import tempfile
@@ -440,7 +440,7 @@ navigation_helper = """
                                 radius: [dp(20), dp(20), dp(20), dp(20)]
                                 pos_hint_y: None
                                 pos_hint_x:  None
-                                #on_release: root.nav_Scanner()
+                                on_release: root.nav_Scanner()
                                 # elevation: 1        
                                 MDBoxLayout:
                                     orientation: "vertical"
@@ -568,49 +568,55 @@ navigation_helper = """
             padding: 0 
             spacing: 0
             ContentNavigationDrawer:
-                ScrollView: 
-                    
+                ScrollView:
                     MDBoxLayout:
                         orientation: "vertical"
                         size_hint_y: 1.2
-                        
                         padding:dp(2)
                         spacing:dp(5)
                         
-                        MDCard:
-                            orientation: "horizontal"
-                            size_hint_y :0.13
+                        # MDCard:
+                        #     orientation: "horizontal"
+                        #     size_hint_y :0.13
                             
-                            radius: [15, 15, 15, 15]
-                            on_release: root.nav_settings() 
-                            spacing:dp(102)
-                            padding:dp(10)
-                            md_bg_color: "#F5F5F5"
+                        #     radius: [15, 15, 15, 15]
+                        #     on_release: root.nav_settings() 
+                        #     spacing:dp(102)
+                        #     padding:dp(10)
+                        #     md_bg_color: "#148EFE"
                             
                             
                             
-                            MDIcon:
-                                icon:"arrow-left"
-                                theme_text_color: 'Custom'
-                                text_color: 0, 0, 0, 1
-                                pos_hint:{"center_y":0.5}
-                                theme_text_color: "Custom"
+                        #     MDIcon:
+                        #         icon:"arrow-left"
+                        #         theme_text_color: 'Custom'
+                        #         text_color: 0, 0, 0, 1
+                        #         pos_hint:{"center_y":0.5}
+                        #         theme_text_color: "Custom"
                                 
-                            MDLabel:
-                                text: "Profile"
-                                theme_text_color: "Custom" 
-                                text_color: 0, 0, 0, 1
-                                font_size: "18sp"
-                                size_hint_x: None
-                                pos_hint:{"center_x":0.5}
-                            
-                            
-                            
+                        #     MDLabel:
+                        #         text: "Profile"
+                        #         theme_text_color: "Custom" 
+                        #         text_color: 0, 0, 0, 1
+                        #         font_size: "18sp"
+                        #         size_hint_x: None
+                        #         pos_hint:{"center_x":0.5}
+                        # MDTopAppBar:
+                        #     title: "[color=#ffffff]Profile[/color]"
+                        #     theme_text_color: "Custom"
+                        #     text_color: 1, 1, 1, 1
+                        #     elevation: 1
+                        #     pos_hint: {'top':1}
+                        #     md_bg_color: "#148EFE"
+                        #     specific_text_color: "#000000"
+                        #     elevation: 1
+                        #     left_action_items:
+                        #         [['arrow-left', lambda x: nav_drawer.set_state("close")]]
+                        #     right_action_items:[['', lambda x: None]]
                             
                         MDBoxLayout: 
                             orientation: "vertical"
-                            size_hint_y: 0.29
-                            
+                            size_hint_y: 0.4
                             size_hint_x: None
                             height: dp(20)
                             width:dp(270)
@@ -629,14 +635,9 @@ navigation_helper = """
                                 orientation: "horizontal"
                                 size_hint_y :0.5
                                 radius: [15, 15, 15, 15]
-                                
                                 spacing:dp(65)
                                 padding:dp(10)
-                            
-                                
-                                
-                                
-                                
+
                                 MDIcon:
                                     icon:"qrcode-scan"
                                     theme_text_color: 'Custom'
@@ -665,29 +666,31 @@ navigation_helper = """
                                     on_touch_down: root.manager.logout() if self.collide_point(*args[1].pos) else None
                                     size: dp(20), dp(20)
                         
-                            
                             MDBoxLayout:
                                 orientation: "vertical"
-                                size_hint_x: 0.5
+                                size_hint_x: 1
                                 pos_hint: {"center_x": 0.5}
                                 spacing:dp(20)
                         
                                 MDLabel:
                                     text: "[b]your name[/b]"
                                     id: username_label
+                                    halign:'center'
                                     markup: True
                                     theme_text_color: "Custom" 
                                     font_name:"Roboto-Bold"
                                     font_size: "18sp"
-                                    pos_hint: {"center_x": 0.9}
+                                    pos_hint: {"center_x": 0.5}
+                                    size_hint_x:1
                                 MDLabel:
                                     text: "[b]Email[/b]"
                                     id:email_label
                                     markup: True
+                                    size_hint_x:1
                                     theme_text_color: "Custom"  
-                                    
                                     font_size: "15sp"
-                                    pos_hint:{"center_x":0.58}
+                                    pos_hint:{"center_x":0.5}
+                                    halign:'center'
                               
                                 MDCard:
                                     orientation: "horizontal"
@@ -708,43 +711,43 @@ navigation_helper = """
                                         font_size: "15sp"
                                     
                                         
-                        MDBoxLayout:
-                            orientation: 'vertical'
-                            size_hint_y: None
-                            size_hint_x: None
-                            height: dp(60)
-                            width:dp(270)
-                            pos_hint: {'center_x': 0.5, 'center_y': 0.07}
-                            padding: dp(20)  
-                            spacing:dp(10)
+                        # MDBoxLayout:
+                        #     orientation: 'vertical'
+                        #     size_hint_y: None
+                        #     size_hint_x: None
+                        #     height: dp(60)
+                        #     width:dp(270)
+                        #     pos_hint: {'center_x': 0.5, 'center_y': 0.07}
+                        #     padding: dp(20)  
+                        #     spacing:dp(10)
                             
                 
-                            canvas:
-                                Color:
-                                    rgba: 115/255, 191/255, 250/255, 1
-                                RoundedRectangle:
-                                    pos: self.pos
-                                    size: self.size
-                                    radius: [20, 20, 20, 20] 
+                        #     canvas:
+                        #         Color:
+                        #             rgba: 115/255, 191/255, 250/255, 1
+                        #         RoundedRectangle:
+                        #             pos: self.pos
+                        #             size: self.size
+                        #             radius: [20, 20, 20, 20] 
                             
 
-                            MDGridLayout:
-                                cols:2
-                                MDLabel:
-                                    text: "[b]Invite Your Friends[/b] \\nEarn $20 both of you"
-                                    markup: True
-                                    theme_text_color: "Custom"  
-                                    md_bg_color: 0, 0, 0, 0
-                                    text_color: 0, 0, 0, 1
-                                    pos_hint: {"center_x": 0.8, "center_y": 0.5}
-                                    font_size: "15sp"
+                            # MDGridLayout:
+                            #     cols:2
+                            #     MDLabel:
+                            #         text: "[b]Invite Your Friends[/b] \\nEarn $20 both of you"
+                            #         markup: True
+                            #         theme_text_color: "Custom"  
+                            #         md_bg_color: 0, 0, 0, 0
+                            #         text_color: 0, 0, 0, 1
+                            #         pos_hint: {"center_x": 0.8, "center_y": 0.5}
+                            #         font_size: "15sp"
 
-                                MDIcon:
-                                    icon: "chevron-right"
-                                    pos_hint: {'center_x': 0.5, 'center_y': 0.1}
-                                    on_touch_down: root.nav_refer() if self.collide_point(*args[1].pos) else None
-                                    theme_text_color: "Custom"
-                                    text_color: 0, 0, 0, 1
+                            #     MDIcon:
+                            #         icon: "chevron-right"
+                            #         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+                            #         on_touch_down: root.nav_refer() if self.collide_point(*args[1].pos) else None
+                            #         theme_text_color: "Custom"
+                            #         text_color: 0, 0, 0, 1
                         MDBoxLayout: #for features
                             orientation: "vertical"
                             size_hint_y: 0.65
@@ -948,7 +951,8 @@ navigation_helper = """
                                     text_color: 0, 0, 0, 1
                                     size_hint_y:None
                                     pos_hint: {"center_x": 0.99, "center_y": 0.5}
-                                    font_size: "15sp"
+                                    font_size: "14sp"
+                                    adaptive_width:True
                                     
                                     
                                 
@@ -996,6 +1000,9 @@ class DashBoardScreen(Screen):
         store = JsonStore('user_data.json').get('user')['value']
         return store["username"]
 
+    def go_back(self):
+        self.manager.current = 'dashboard'
+    
     def nav_addPhone(self):
         # Create a modal view for the loading animation
         modal_view = ModalView(size_hint=(None, None), size=(300, 150), background_color=[0, 0, 0, 0])
@@ -1404,54 +1411,43 @@ class DashBoardScreen(Screen):
 
             current_date = ""
 
-            # Create a dictionary to store transactions grouped by date
-            transactions_by_date = {}
-
             for transaction in sorted(filter(lambda x: x['date'] is not None, transactions), key=lambda x: x['date'],
-                                      reverse=True):
+                                    reverse=True):
                 transaction_datetime = transaction['date']
                 transaction_date_str = transaction_datetime.strftime('%Y-%m-%d')
                 transaction_date = transaction_date_str.split(' ')[0]
                 transactions_text = f"{transaction['receiver_phone']}"
                 fund_text = f"{transaction['fund']}"
 
-                # Add transaction to transactions_by_date dictionary
-                transactions_by_date.setdefault(transaction_date, []).append(transaction)
-
-            for date, transactions_for_date in transactions_by_date.items():
-                # Check if there are any transactions with non-None fund for this date
-                if any(transaction['fund'] is not None for transaction in transactions_for_date):
-                    header_text = f"[b]{date}[/b]"
+                if transaction_date != current_date:
+                    current_date = transaction_date
+                    header_text = f"[b]{transaction_date}[/b]"
                     list1 = OneLineListItem(text=header_text, height=dp(15), theme_text_color='Custom',
                                             text_color=[0, 0, 0, 1], divider=None, bg_color="#e5f3ff", )
+
                     trans_screen.ids.transaction_list.add_widget(list1)
 
-                    for transaction in transactions_for_date:
-                        if transaction['fund'] is not None:
-                            transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(36))
+                transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(36))
 
-                            # Add transaction details
-                            transaction_item_widget = OneLineListItem(text=f"{transactions_text}",
-                                                                      theme_text_color='Custom',
-                                                                      text_color=[0, 0, 0, 1], divider=None)
-                            transaction_container.add_widget(transaction_item_widget)
+                # Add transaction details
+                transaction_item_widget = OneLineListItem(text=f"{transactions_text}", theme_text_color='Custom',
+                                                        text_color=[0, 0, 0, 1], divider=None)
+                transaction_container.add_widget(transaction_item_widget)
 
-                            transaction_container.add_widget(Widget(size_hint_x=None, width=dp(20)))
+                transaction_container.add_widget(Widget(size_hint_x=None, width=dp(20)))
 
-                            if transaction['transaction_type'] == 'Credit':
-                                fund_color = [0, 0.5, 0, 1]
-                                sign = '+'
-                            else:
-                                fund_color = [1, 0, 0, 1]
-                                sign = '-'
+                if transaction['transaction_type'] == 'Credit':
+                    fund_color = [0, 0.5, 0, 1]
+                    sign = '+'
+                else:
+                    fund_color = [1, 0, 0, 1]
+                    sign = '-'
 
-                            fund_label = MDLabel(text=f"{sign}₹{fund_text}", theme_text_color='Custom',
-                                                 text_color=fund_color,
-                                                 halign='right', padding=(15, 15))
-                            transaction_container.add_widget(fund_label)
+                fund_label = MDLabel(text=f"{sign}₹{fund_text}", theme_text_color='Custom', text_color=fund_color,
+                                    halign='right', padding=(15, 15))
+                transaction_container.add_widget(fund_label)
 
-                            trans_screen.ids.transaction_list.add_widget(transaction_container)
-
+                trans_screen.ids.transaction_list.add_widget(transaction_container)
         except Exception as e:
             print(f"Error getting transaction history: {e} ,{traceback.format_exc()}")
 

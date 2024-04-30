@@ -335,7 +335,8 @@ class AddMoneyScreen(Screen):
     def add_money(self):
         wallet_scr = self.manager.get_screen('addmoney')
         money = wallet_scr.ids.balance.text
-        amount = int(money)
+        
+        amount = int(money) if money != "" else print('Please enter an amount')
         print(amount)
         # print("amount " + amount)
         bank_name = wallet_scr.ids.bank_dropdown.text
@@ -345,6 +346,9 @@ class AddMoneyScreen(Screen):
             if self.ids.options_button.icon == self.options_button_icon_mapping[i]:
                 global currency
                 currency=i
+        if not bank_name or not amount or not currency:
+            self.manager.show_error_popup("Please fill in all fields.")
+            return
         
         rate_response = self.currency_rate(currency, amount)
         print(rate_response)
@@ -513,11 +517,12 @@ class AddMoneyScreen(Screen):
         
         #users data
         users_default_account = user_data['default_account']
-        ban_name = app_tables.wallet_users_account.get(account_number=float(users_default_account))
-        if ban_name:
-            bank_name = ban_name['bank_name']
-            self.ids.bank_dropdown.text = bank_name
-            self.test(bank_name)
+        if users_default_account:
+            ban_name = app_tables.wallet_users_account.get(account_number=float(users_default_account))
+            if ban_name:
+                bank_name = ban_name['bank_name']
+                self.ids.bank_dropdown.text = bank_name
+                self.test(bank_name)
 
 class WalletApp(MDApp):
     def build(self):
