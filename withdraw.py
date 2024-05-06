@@ -12,24 +12,28 @@ Builder.load_string(
     """
 <WithdrawScreen>:
     MDScreen:
-        MDTopAppBar:
-            title: 'Withdraw Money'  # Updated title to 'Withdraw Money'
-            anchor_title: 'center'
-            elevation: 1
-            left_action_items: [['arrow-left', lambda x: root.go_back()]]
-            right_action_items: [["",lambda x:None]]
-            md_bg_color: "#148EFE"
-            specific_text_color: "#ffffff"
-            pos_hint:{'top':1}
         MDBoxLayout:
             orientation: 'vertical'
+            size_hint_y: 0.1
+            pos_hint: {"top":1}
+            MDTopAppBar:
+                title: 'Withdraw Money'  # Updated title to 'Withdraw Money'
+                anchor_title: 'center'
+                elevation: 1
+                left_action_items: [['arrow-left', lambda x: root.go_back()]]
+                right_action_items: [["",lambda x:None]]
+                md_bg_color: "#148EFE"
+                specific_text_color: "#ffffff"
+                pos_hint:{'top':1}
+            MDBoxLayout:
+                orientation: 'vertical'
 
         MDBoxLayout:
             orientation: 'vertical'
             padding: dp(10)
             spacing: dp(10)
-            size_hint_y:0.9
-            pos_hint: {"top":0.9}
+            size_hint_y:1
+            pos_hint: {"top":0.95}
             #md_bg_color: "#fe1616"
             MDBoxLayout:
                 orientation: 'vertical'
@@ -223,10 +227,10 @@ Builder.load_string(
                 orientation: 'vertical'    
         MDBoxLayout:
             size_hint_y: None
-            height: dp(100)
+            height:dp(100)
             pos_hint: {'center_x': 0.5, 'center_y': 0.1}
             size_hint_x: None
-            width: dp(100)
+            width:dp(100)
 """
 )
 
@@ -271,10 +275,12 @@ class WithdrawScreen(Screen):
                 )
                 self.menu.open()
             else:
-                toast("No accounts found")
+                # toast("No accounts found")
+                self.manager.show_notification('Alert!',"No accounts found.")
 
         except Exception as e:
             print(f"Error fetching bank names: {e}")
+            self.manager.show_notification('Alert!','An error occured. Please try again.')
 
         finally:
             pass
@@ -291,11 +297,12 @@ class WithdrawScreen(Screen):
             if matching_accounts:
                 self.account_number = matching_accounts[0]['account_number']
             else:
-                toast("Account not found")
+                self.manager.show_notification('Alert!',"Account not found.")
             if self.menu:
                 self.menu.dismiss()
         except Exception as e:
             print(f"Error fetching account details: {e}")
+            self.manager.show_notification('Alert!','An error occured. Please try again.')
 
     def select_currency(self, currency):
         wdrw_scr = self.manager.get_screen('withdraw')
@@ -309,15 +316,16 @@ class WithdrawScreen(Screen):
         phone = JsonStore('user_data.json').get('user')['value']["phone"]
         balance_table = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency)
         selected_bank = wdrw_scr.ids.bank_dropdown.text
+        print(selected_bank)
 
-        if not selected_bank or not amount or not currency:
-            self.manager.show_error_popup("Please fill in all fields.")
+        if not selected_bank != "Select bank account" or not amount or not currency:
+            self.manager.show_notification("Alert!","Please fill in all fields.")
             return
 
         try:
             amount = float(amount)
         except ValueError:
-            self.manager.show_error_popup("Invalid amount. Please enter a valid number.")
+            self.manager.show_notification('Alert!',"Invalid amount. Please enter a valid number.")
             return
 
         try:
@@ -328,9 +336,11 @@ class WithdrawScreen(Screen):
                     balance_table['balance'] = new_balance
                     balance_table.update()
                 else:
-                    toast("Balance is less than the entered amount")
+                    # toast("Balance is less than the entered amount")
+                    self.manager.show_notification('Alert!',"Balance is less than the entered amount.")
             else:
-                toast("You don't have a balance in this currency type")
+                # toast("You don't have a balance in this currency type")
+                self.manager.show_notification('Alert!',"You don't have a balance in this currency type.")
             app_tables.wallet_users_transaction.add_row(
                 receiver_phone=float(self.account_number),
                 phone=phone,
@@ -339,12 +349,12 @@ class WithdrawScreen(Screen):
                 transaction_type="Debit"
             )
 
-            success_message = f"Withdrawal successful."
-            self.manager.show_success_popup(success_message)
+            self.manager.show_notification('Success',"Withdrawal successful.")
+            self.ids.balance_lbl.text = str(balance_table['balance'])
             # self.manager.show_balance()
         except Exception as e:
             print(f"Error withdrawing money: {e}")
-            self.manager.show_error_popup("An error occurred. Please try again.")
+            self.manager.show_notification('Alert!',"An error occurred. Please try again.")
 
     def update_amount(self, amount):
         self.ids.amount_textfield.text = str(amount)

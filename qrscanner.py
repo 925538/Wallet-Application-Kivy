@@ -113,3 +113,4 @@ class ScanAnalyze(Preview):
                 self.extracted_data(list_of_all_barcodes[0])
             else:
                 print("Not found")
+                self.manager.show_notification('Alert!',"An error occured. Please try again.")

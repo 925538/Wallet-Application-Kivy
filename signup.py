@@ -184,7 +184,8 @@ class SignUpScreen(Screen):
         try:
             if self.is_phone_number_registered(phone_no):
 
-                toast("Phone number already exists. Choose another.").open()
+                # toast("Phone number already exists. Choose another.").open()
+                self.manager.show_notification('Alert!','Phone number already exists. Choose another.')
                 return
 
             else:  # Add user data to the 'login' collection in Anvil
@@ -201,17 +202,18 @@ class SignUpScreen(Screen):
                 )
 
                 # Show a popup with a success message
-                dialog = MDDialog(
-                    title="Alert",
-                    buttons=[
-                        MDFlatButton(
-                            text="OK",
-                            on_release=lambda *args: (dialog.dismiss(), self.dismiss_and_navigate())
-                        )
-                    ]
-                )
-                dialog.text = f"Successfully signed up."
-                dialog.open()
+                # dialog = MDDialog(
+                #     title="Alert",
+                #     buttons=[
+                #         MDFlatButton(
+                #             text="OK",
+                #             on_release=lambda *args: (dialog.dismiss(), self.dismiss_and_navigate())
+                #         )
+                #     ]
+                # )
+                # dialog.text = f"Successfully signed up."
+                # dialog.open()
+                self.manager.show_notification('Success','Successfully signed up.')
 
                 self.ids.address.text = ''
                 self.ids.pan_card.text = ''

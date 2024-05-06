@@ -97,7 +97,8 @@ class SignInScreen(Screen):
         date = datetime.now()
         if input_text == '' or password == '':
             # Show popup for required fields
-            self.show_popup("All Fields are Required")
+            # self.show_popup("All Fields are Required")
+            self.manager.show_notification('Alert!','All Fields are Required')
         else:
             try:
                 if re.match(r'^\d{10}$', input_text):  # Phone number with 10 digits
@@ -105,12 +106,14 @@ class SignInScreen(Screen):
                 elif re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', input_text):  # Email
                     self.user = app_tables.wallet_users.get(email=input_text, password=password)
                 else:
-                    toast("invalid phone or email")
+                    # toast("invalid phone or email")
+                    self.manager.show_notification('Alert!','Invalid phone or email.')
 
                 # Check if the user was found
                 if self.user is None:
                     # Show popup for invalid user
-                    self.show_popup("Invalid User")
+                    # self.show_popup("Invalid User")
+                    self.manager.show_notification('Alert!','Invalid User.')
                 else:
                     # Now 'user' contains the Anvil row
                     self.user.update(last_login=date)
@@ -122,8 +125,9 @@ class SignInScreen(Screen):
                     if user_data['banned']:  # Check if user is banned
                         print("User is banned. Showing popup.")
                         # Show popup for banned user
-                        self.show_popup(
-                            "You have been banned due to some credential issue. Your amount will be debited to your account within 5 days.")
+                        # self.show_popup(
+                            # "You have been banned due to some credential issue. Your amount will be debited to your account within 5 days.")
+                        self.manager.show_notification('Alert!','You have been banned due to some credential issue. Your amount will be debited to your account within 5 days.')
                     else:
                         # Proceed with login
                         # Show popup for successful login
@@ -170,10 +174,11 @@ class SignInScreen(Screen):
                             conn.close()
                         except Exception as e:
                             print(e)
-
+                            self.manager.show_notification('Alert!','An error occured. Please try again.')
 
             except Exception as e:
                 print(e)
+                self.manager.show_notification('Alert!','An error occured. Please try again.')
 
     def show_popup(self, text):
         dialog = MDDialog(

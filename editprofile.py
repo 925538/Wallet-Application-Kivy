@@ -210,14 +210,15 @@ class EditUser(Screen):
                 )
 
                 print("User details updated successfully.")
-                self.show_update_success_popup()
+                # self.show_update_success_popup()
+                self.manager.show_notification('Sucess','Your profile has been updated successfully. Please log in again.')
             else:
                 print(f"User with phone number {phone} does not exist.")
-                self.manager.show_error_popup(f"User with phone number {phone} does not exist.")
+                self.manager.show_notification('Alert!',f"User with phone number {phone} does not exist.")
 
         except Exception as e:
             print(f"Error updating user details: {e}")
-
+            self.manager.show_notification('Alert!',"An error occured. Please try again.")
     def show_update_success_popup(self):
         dialog = MDDialog(
             title="Update Success",

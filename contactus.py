@@ -66,7 +66,8 @@ class ContactUsScreen(Screen):
         return False
 
     def Submit(self):
-        self.show_popup("Your Query has been submited. \nOur Technical Executive will respond you shortly.")
+        # self.show_popup("Your Query has been submited. \nOur Technical Executive will respond you shortly.")
+        self.manager.show_notification('Alert!','Query submited.\nOur Technical Executive will respond you shortly.')
         self.manager.current = 'dashboard'
 
     def show_popup(self, text):

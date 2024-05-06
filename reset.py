@@ -111,23 +111,26 @@ class ResetPassword(Screen):
                 user.update(password=new_encrypted_password)
 
                 # Show a success pop-up
-                dialog = MDDialog(
-                    title="Success",
-                    text="Password updated successfully!",
-                    buttons=[
-                        MDFlatButton(
-                            text="OK",
-                            on_release=lambda *args: (dialog.dismiss(), self.go_back())
-                        )
-                    ]
-                )
-                dialog.open()
+                # dialog = MDDialog(
+                #     title="Success",
+                #     text="Password updated successfully!",
+                #     buttons=[
+                #         MDFlatButton(
+                #             text="OK",
+                #             on_release=lambda *args: (dialog.dismiss(), self.go_back())
+                #         )
+                #     ]
+                # )
+                # dialog.open()
+                self.manager.show_notification('Success',"Password updated successfully.")
             else:
                 # Show an error pop-up for incorrect previous password
-                self.show_error_popup("Incorrect previous password. Please try again.")
+                # self.show_error_popup("Incorrect previous password. Please try again.")
+                self.manager.show_notification('Alert!',"Incorrect previous password. Please try again.")
         else:
             # Handle the case where the user is not found
             print("User not found.")
+            self.manager.show_notification('Alert!','User not found.')
 
     def show_error_popup(self, error_text):
         # Show an error pop-up

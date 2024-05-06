@@ -144,7 +144,8 @@ class AddAccountScreen(Screen):
         # Check if the account numbers match
         if account_number != confirm_account_number:
             print("Error: Account numbers do not match.")
-            Snackbar(text="Error: Account number didn't match.").open()
+            # Snackbar("Error: Account number didn't match.").open()
+            self.manager.show_notification('Alert!','Account number didnt match.')
             # You might want to handle this case in your UI, e.g., show an error message.
             return
 
@@ -157,7 +158,8 @@ class AddAccountScreen(Screen):
             existing_account = accounts_table.get(account_number=float(account_number))
             if existing_account:
                 print("Error: Account number already exists.")
-                Snackbar(text="Error: Account number already exists.").open()
+                # Snackbar(text="Error: Account number already exists.").open()
+                self.manager.show_notification('Alert!', 'Account Number Already Exists.')
                 return
 
             # Add a new row to the 'accounts' subcollection
@@ -173,9 +175,11 @@ class AddAccountScreen(Screen):
             )
 
             print("Account details added successfully.")
-            toast("account added successfully")
-            self.manager.current = 'dashboard'
+            # toast("account added successfully")
+            self.manager.show_notification('Success', "Account details added successfully")
+            self.manager.current = 'accmanage'
 
         except Exception as e:
             print(f"Error adding account details: {e}")
-            toast("error adding account details")
+            # toast("error adding account details")
+            self.manager.show_notification('Alert!','Error adding account details.')

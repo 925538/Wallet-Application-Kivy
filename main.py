@@ -21,6 +21,9 @@ from settings import SettingsScreen
 from loadingScreen import loadingScreen
 from contactus import ContactUsScreen
 from noInternetScreen import NoInternetPage
+from kivymd.uix.label import MDLabel
+from kivy.uix.anchorlayout import AnchorLayout
+
 class ScreenManagement(ScreenManager):
     current_user_data = None  # Class attribute to store the current user data
 
@@ -169,7 +172,7 @@ class ScreenManagement(ScreenManager):
             auto_dismiss=True
         )
         popup.open()
-        self.current = 'dashboard'
+        # self.current = 'dashboard'
 
     def nav_contactus(self):
         self.add_widget(Factory.ContactUsScreen(name='contactus'))
@@ -200,6 +203,37 @@ class ScreenManagement(ScreenManager):
 
     def Add_Money(self):
         self.current = 'Wallet'
+    def show_notification(self, title, message):
+    # Create content layout
+        content_layout = BoxLayout(orientation="vertical", padding="10dp",spacing = '5dp')
+
+        # Create title label with bold font
+        # title_label = MDLabel(text=text, font_size="20sp", bold=True, theme_text_color="Custom", text_color=(1, 1, 1, 1))
+
+        # Create message label
+        message_label = MDLabel(text=message, font_size=(150, None), halign="left", theme_text_color="Custom", text_color=(1, 1, 1, 1))
+        ok_button = Button(text='OK', size_hint=(None, None), size=('50dp', '30dp'))
+        ok_button.bind(on_press=lambda *args: popup.dismiss())
+        # Add labels to content layout
+        anchor_layout = AnchorLayout(anchor_x='right')
+        anchor_layout.add_widget(ok_button)\
+
+        # Add labels and button to content layout
+        # content_layout.add_widget(title_label)
+        content_layout.add_widget(message_label)
+        content_layout.add_widget(anchor_layout)
+
+        # Create and display the notification popup
+        popup = Popup(
+            title=title,  # Remove default title
+            content=content_layout,
+            size_hint=(None, None),
+            size=(350, 270),
+            auto_dismiss=True,  # Close on touch outside the card
+            background_color=(0.078, 0.557, 0.996, 1.0)
+        )
+        popup.open()
+        return
 
 
 class WalletApp(MDApp):

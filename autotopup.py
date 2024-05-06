@@ -179,13 +179,14 @@ class AutoTopupScreen(Screen):
 
         except requests.exceptions.HTTPError as errh:
             print(f"HTTP Error: {errh}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
         except requests.exceptions.RequestException as err:
             print(f"Request Error: {err}")
-
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
-
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
     def show_currency_options(self, button):
         currency_options = ["INR", "GBP", "USD", "EUR"]
         self.menu_list = [
@@ -480,10 +481,12 @@ class AutoTopupCard(MDCard):
                 )
                 self.menu.open()
             else:
-                toast("No accounts found")
+                # toast("No accounts found")
+                self.manager.show_notification('Alert!','No accounts found.')
 
         except Exception as e:
             print(f"Error fetching bank names: {e}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
         finally:
             # No need to close a connection in Firebase Realtime Database
@@ -504,12 +507,15 @@ class AutoTopupCard(MDCard):
                 self.account_number = account[0]
                 print(self.account_number)
             else:
-                toast("Account not found")
+                # toast("Account not found")
+                self.manager.show_notification('Alert!','Account not found.')
             if self.menu:
                 self.menu.dismiss()
 
         except Exception as e:
             print(f"Error fetching account number: {e}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
+
 
     def update_balance(self, button):
         amount_with_sign = button.text
@@ -536,6 +542,7 @@ class AutoTopupCard(MDCard):
                 print(f"The exchange rate value is: {self.exchange_rate_value}")
             else:
                 print("Error fetching exchange rates.")
+                self.manager.show_notification('Alert!','An error occurred. Please try again.')
             store = JsonStore('user_data.json')
             phone = store.get('user')['value']["phone"]
             balance_table = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency)
@@ -550,14 +557,17 @@ class AutoTopupCard(MDCard):
                         balance_table['balance'] = new_balance
                         print(f'{new_balance}')
                         balance_table.update()
-                        toast("Minimum-Topup Successful.", duration=5)
+                        # toast("Minimum-Topup Successful.", duration=5)
+                        self.manager.show_notification('Success','Minimum-Topup Successful.')
                         app = App.get_running_app()
                         app.root.current = 'dashboard'
                     else:
                         user_table['minimum_topup'] = False
-                        toast("Auto-topup is not required.")
+                        # toast("Auto-topup is not required.")
+                        self.manager.show_notification('Alert!','Auto-topup is not required.')
                 else:
-                    toast(f"Insufficient balance in currency {currency}")
+                    # toast(f"Insufficient balance in currency {currency}")
+                    self.manager.show_notification('Alert!', f"Insufficient balance in currency {currency}")
                 app_tables.wallet_users_transaction.add_row(
                     receiver_phone=None,
                     phone=phone,
@@ -575,10 +585,12 @@ class AutoTopupCard(MDCard):
                 # self.balance.text = ""
             except Exception as e:
                 print(f"Error minimum-topup money: {e}")
-                self.show_error_popup("An error occurred. Please try again.")
+                # self.show_error_popup("An error occurred. Please try again.")
+                self.manager.show_notification('Alert!','An error occurred. Please try again.')
                 self.balance.text = ""
         else:
-            toast("Please enable the auto-topup switch to proceed.")
+            # toast("Please enable the auto-topup switch to proceed.")
+            self.manager.show_notification('Alert!','Please enable the auto-topup switch to proceed.')
 
     def update_amount(self, amount):
         self.balance.text = str(amount)
@@ -609,13 +621,16 @@ class AutoTopupCard(MDCard):
 
         except requests.exceptions.HTTPError as errh:
             print(f"HTTP Error: {errh}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
+            
 
         except requests.exceptions.RequestException as err:
             print(f"Request Error: {err}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
-
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
 class ScheduledTopupCard(MDCard):
     is_visible = BooleanProperty(False)
@@ -760,6 +775,7 @@ class ScheduledTopupCard(MDCard):
             self.menu.open()
         except Exception as e:
             print(f"Error fetching frequencys: {e}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
     def selected_frequency(self, money):
         if self.frequency_dropdown:
@@ -792,10 +808,12 @@ class ScheduledTopupCard(MDCard):
                 )
                 self.menu.open()
             else:
-                toast("No accounts found")
+                # toast("No accounts found")
+                self.manager.show_notification('Alert!','No accounts found.')
 
         except Exception as e:
             print(f"Error fetching bank names: {e}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
         finally:
             # No need to close a connection in Firebase Realtime Database
@@ -816,12 +834,14 @@ class ScheduledTopupCard(MDCard):
                 self.account_number = account[0]
                 print(self.account_number)
             else:
-                toast("Account not found")
+                # toast("Account not found")
+                self.manager.show_notification('Alert!','Account not found.')
             if self.menu:
                 self.menu.dismiss()
 
         except Exception as e:
             print(f"Error fetching account number: {e}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
     def update_balance(self, button):
         amount_with_sign = button.text
@@ -849,6 +869,7 @@ class ScheduledTopupCard(MDCard):
                 print(f"The exchange rate value is: {self.exchange_rate_value}")
             else:
                 print("Error fetching exchange rates.")
+                self.manager.show_notification('Alert!','An error occurred. Please try again.')
             store = JsonStore('user_data.json')
             phone = store.get('user')['value']["phone"]
             balance_table = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency)
@@ -882,7 +903,8 @@ class ScheduledTopupCard(MDCard):
                             new_balance = old_balance + self.exchange_rate_value
                             balance_table['balance'] = new_balance
                             balance_table.update()
-                            toast("Timely-Topup Successful.", duration=5)
+                            # toast("Timely-Topup Successful.", duration=5)
+                            self.manager.show_notification('Success','Timely-Topup successful.')
                             app_tables.wallet_users_transaction.add_row(
                                 receiver_phone=None,
                                 phone=phone,
@@ -897,22 +919,27 @@ class ScheduledTopupCard(MDCard):
                                 app.root.current = 'dashboard'
                             except AttributeError:
                                 print("Error: Could not find screen manager to navigate.")
+                                self.manager.show_notification('Alert!','An error occurred. Please try again.')
                             self.balance.text = ""
                         else:
-                            toast("Auto-topup is not required.")
+                            # toast("Auto-topup is not required.")
+                            self.manager.show_notification('Alert!','Aotu-topup is not required')
                             self.manager.current = 'dashboard'
                             self.balance.text = ""
                     else:
                         print("Error: No matching accounts found for the user or invalid account number.")
+                        self.manager.show_notification('Alert!','No matching accounts found for the user or invalid account number.')
+
 
                 except:
                     pass
             except Exception as e:
                 print(f"Error timely-topup money: {e}")
-                self.show_error_popup("An error occurred. Please try again.")
+                self.manager.show_notification('Alert!','An error occurred. Please try again.')
                 self.balance.text = ""
         else:
-            toast("Please enable the auto-topup switch to proceed.")
+            # toast("Please enable the auto-topup switch to proceed.")
+            self.manager.show_notification('Alert!','Please enable the auto-topup switch to proceed.')
 
     def update_amount(self, amount):
         self.balance.text = str(amount)
@@ -943,12 +970,15 @@ class ScheduledTopupCard(MDCard):
 
         except requests.exceptions.HTTPError as errh:
             print(f"HTTP Error: {errh}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
         except requests.exceptions.RequestException as err:
             print(f"Request Error: {err}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
 class SetOnOffScreen(Screen):
     def __init__(self, **kwargs):

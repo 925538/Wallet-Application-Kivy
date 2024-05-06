@@ -173,13 +173,16 @@ class PayScreen(MDScreen):
                     )
                     print(f"Payment successful: {amount}")
                     # Navigate to the dashboard screen after successful payment
-                    self.manager.current = 'dashboard'
+                    # self.manager.current = 'dashboard'
                 except Exception as e:
                     print(f"Error processing payment: {e}")
+                    self.manager.show_notification('Alert!','Error processing payment.')
             else:
                 print("Please select sender and receiver banks.")
+                self.manager.show_notification('Alert!','Please select sender and receiver banks.')
         else:
             print("Please enter a valid amount.")
+            self.manager.show_notification('Alert!','Please enter a valid amount.')
 
 
 class SelftransferScreen(Screen):
@@ -245,6 +248,7 @@ class SelftransferScreen(Screen):
 
         except Exception as e:
             print(f"Error fetching bank names: {e}")
+            self.manager.show_notification('Alert!','An error occured. Please try again.')
 
     def set_selected_sender_bank(self, bank_name):
         self.ids.sender_button.text = f"Sending Bank: {bank_name}"
@@ -278,4 +282,5 @@ class SelftransferScreen(Screen):
             self.manager.current = 'PayScreen'
         else:
             print("Sender and receiver banks not selected")
-            toast("Please select sender and receiver banks first.")
+            # toast("Please select sender and receiver banks first.")
+            self.manager.show_notification('Alert!', "Please select Sender and Receiver Banks first.")

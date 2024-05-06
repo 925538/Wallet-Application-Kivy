@@ -131,6 +131,7 @@ class BalanceScreen(Screen):
                 self.fetch_and_update_balance(phone, currency)
         except Exception as e:
             print(f"Error fetching balances: {e}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
     def fetch_and_update_balance(self, phone, currency):
         try:
@@ -145,6 +146,7 @@ class BalanceScreen(Screen):
             self.ids[label_id].text = f" {balance:.2f}"  # Update the text property with the formatted balance
         except Exception as e:
             print(f"Error fetching {currency} balance: {e}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
             balance = 0  # Set balance to 0 if an error occurs (currency not found or other exceptions)
             label_id = f"{currency.lower()}_balance_label"
             self.ids[label_id].text = f" {balance:.2f}"
