@@ -91,6 +91,7 @@ KV = '''
                         on_release: root.on_number_click(float(root.ids.search_text_card.text))
                         pos_hint:{'x':0.03}
                         divider:None
+                        disabled:True
 
                     Widget:
                         size_hint_y:None
@@ -224,11 +225,13 @@ class AddPhoneScreen(Screen):
             userdata = app_tables.wallet_users.get(phone=number)
             username = userdata['username']
             print(f'username in SearchField:{username}')
+            self.ids.search_result_item.disabled = False
             self.ids.search_result_item.text = username
             return username
 
         except Exception as e:
             print(e)
+            self.manager.show_notification('Alert!','User not found.')
             return {}
 
     def on_number_click(self, number):
@@ -254,6 +257,7 @@ class AddPhoneScreen(Screen):
                 print(f"{user_data['phone']}")
             else:
                 print(f"User with phone number {number} not found in the database")
+                self.manager.show_notification('Alert!','User not found.')
 
 
 class RoundedMDLabel(MDLabel):
@@ -454,7 +458,8 @@ class UserDetailsScreen(Screen):
             current_user_data = current_user_data[0]
             existing_bal = current_user_data['balance']
             if amount > existing_bal:
-                toast("Insufficient Balance.")
+                # toast("Insufficient Balance.")
+                self.manager.show_notification('Alert!','Insufficient Balance.')
             else:
                 # Deduct amount from current user's balance
                 current_user_data['balance'] -= amount
@@ -492,13 +497,16 @@ class UserDetailsScreen(Screen):
                     Clock.schedule_once(lambda dt: self.clear_text_field(), 0.1)
 
                     # Show a success toast
-                    toast("Money added successfully.")
-                    self.manager.current = 'dashboard'
+                    # toast("Money added successfully.")
+                    self.manager.show_notification('Success','Money added successfully.')
+                    # self.manager.current = 'dashboard'
                     # self.manager.show_balance()
                 else:
                     print("Error: More than one row matched for searched user")
+                    self.manager.show_notification('Alert!','An error occurred. Please try again.')
         else:
             print("Error: More than one row matched for current user")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
     def clear_text_field(self):
         self.ids.my_text_field.text = ''

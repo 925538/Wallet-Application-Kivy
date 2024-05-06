@@ -1450,6 +1450,7 @@ class DashBoardScreen(Screen):
                 trans_screen.ids.transaction_list.add_widget(transaction_container)
         except Exception as e:
             print(f"Error getting transaction history: {e} ,{traceback.format_exc()}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
     menu = None  # Add this line to declare the menu attribute
     options_button_icon_mapping = {

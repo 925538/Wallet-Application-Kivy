@@ -157,6 +157,7 @@ class AccmanageScreen(Screen):
                     self.dynmaic_ids[users_default_account].secondary_text='primary account'
         except Exception as e:
             print(f"Error updating details: {e}")
+            self.manager.show_notification('Alert!','Some error occured try again.')
             self.hide_loading_animation()
     #checking this code to get bank details
     # def setting_default_account(self,bank):
@@ -215,10 +216,10 @@ class AccmanageScreen(Screen):
             if accounts_table['account_number'] == float(instance.id):
                 accounts_table.delete()
                 self.menu.dismiss()
-                self.manager.current = 'dashboard'
                 break
             else:
                 print('couldnt delete')
+                self.manager.show_notification('Alert!',"Couldn't delete account.")
                 self.menu.dismiss()
 
         # print(instance.id)

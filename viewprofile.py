@@ -307,8 +307,12 @@ class Profile(Screen):
             from android.storage import primary_external_storage_path
             request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
             # app_dir = App.get_running_app().user_data_dir
+            from os.path import join
+            app_dir=App.get_running_app().user_data_dir
+            # Path = join(app_dir,"DCIM")
             global Path
-            Path=primary_external_storage_path()
+            # Path=primary_external_storage_path()
+            Path = join(app_dir,"/storage/emulated/0/")
 
         else:
             Path = r'/'
@@ -461,9 +465,11 @@ class Profile(Screen):
                         self.ids.profile.icon = temp_image_path
                     except Exception as e:
                         print(e)
+                        self.manager.show_notification('Alert!','An error occured.  Please try again.')
             # Continue with further processing...
         except Exception as e:
             print(f"Error opening image: {e}")
+            self.manager.show_notification('Alert!','An error occured.  Please try again.')
         self.popup.dismiss()
 
     def on_pre_enter(self):

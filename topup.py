@@ -108,10 +108,12 @@ class Topup(Screen):
                 )
                 self.menu.open()
             else:
-                toast("No accounts found")
+                # toast("No accounts found")
+                self.manager.show_notification('Alert!','No accounts found.')
 
         except Exception as e:
             print(f"Error fetching bank names: {e}")
+            self.manager.show_notification('Alert!','An error occured. Please try again.')
 
         finally:
             # No need to close a connection in Firebase Realtime Database
@@ -132,12 +134,15 @@ class Topup(Screen):
                 self.account_number = account[0]
                 print(self.account_number)
             else:
-                toast("Account not found")
+                # toast("Account not found")
+                self.manager.show_notification('Alert!', 'Account not found.')
 
             self.menu.dismiss()
 
         except Exception as e:
             print(f"Error fetching account number: {e}")
+            self.manager.show_notification('Alert!','An error occured. Please try again.')
+
 
     def add_money(self):
         topup_scr = self.manager.get_screen('topup')
@@ -153,6 +158,7 @@ class Topup(Screen):
             print(f"The exchange rate value is: {self.exchange_rate_value}")
         else:
             print("Error fetching exchange rates.")
+            self.manager.show_notification('Alert!','An error occured. Please try again.')
         store = JsonStore('user_data.json')
         phone = store.get('user')['value']["phone"]
         balance_table = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency)
@@ -183,17 +189,20 @@ class Topup(Screen):
                     transaction_type="credit"
                 )
                 # Show a success toast
-                toast("Money added successfully.")
+                # toast("Money added successfully.")
+                self.manager.show_notification('Success','Money added successfully.')
                 self.manager.current = 'dashboard'
                 self.manager.show_balance()
 
             except Exception as e:
                 print(f"Error adding money: {e}")
-                toast("An error occurred. Please try again.")
+                # toast("An error occurred. Please try again.")
+                self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
         else:
             # Show an error toast
-            toast("Invalid amount. Please enter an amount between 500 and 100000.")
+            # toast("Invalid amount. Please enter an amount between 500 and 100000.")
+            self.manager.show_notification('Alert!','Invalid amount. Please enter an amount between 500 and 100000.')
 
     def currency_rate(self, currency_type, money):
         # Set API Endpoint and access key (replace 'API_KEY' with your actual API key)
@@ -219,9 +228,13 @@ class Topup(Screen):
 
         except requests.exceptions.HTTPError as errh:
             print(f"HTTP Error: {errh}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
+            
 
         except requests.exceptions.RequestException as err:
             print(f"Request Error: {err}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
+            self.manager.show_notification('Alert!','An error occurred. Please try again.')

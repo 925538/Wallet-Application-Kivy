@@ -13,7 +13,7 @@ from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.screen import Screen
 from kivy.base import EventLoop
-
+from numpy import spacing  
 kv_string = ''' 
 <TransferScreen>:
     MDScreen:
@@ -210,7 +210,8 @@ class TransferScreen(Screen):
 
         # Check if any field is empty
         if not all([amount, receiver_phone, currency, purpose]):
-            toast("Please fill in all fields.", duration=4)
+            # toast("Please fill in all fields.", duration=4)
+            self.manager.show_notification('Alert!', 'Please fill in all fields.')
             return
 
         # Get data from the text fields and spinner
@@ -218,7 +219,8 @@ class TransferScreen(Screen):
         try:
             receiver_phone = float(self.ids.mobile_no_field.text)
         except ValueError:
-            toast("Invalid mobile number. Please enter a valid numeric value.", duration=4)
+            # toast("Invalid mobile number. Please enter a valid numeric value.", duration=4)
+            self.manager.show_notification('Alert!',"Invalid mobile number. Please enter a valid numeric value.")
             return
         currency = self.ids.currency_spinner.text
 
@@ -229,7 +231,9 @@ class TransferScreen(Screen):
         # check reciever is exist or not
         rec_exist = self.check_reg(receiver_phone)
         if rec_exist is None:
-            self.show_not_registered_dialog()
+            # self.show_not_registered_dialog()
+            self.manager.show_notification("Alert!","User not registered. Consider inviting the user to join.")
+
             return
         reciever = app_tables.wallet_users_balance.get(phone=receiver_phone, currency_type=currency)
         try:
@@ -249,42 +253,46 @@ class TransferScreen(Screen):
                         r_new_balance = r_old_balance + amount
                         reciever['balance'] = r_new_balance
                         reciever.update()
+                        app_tables.wallet_users_transaction.add_row(
+                                    receiver_phone=receiver_phone,
+                                    phone=senders_phone,
+                                    fund=amount,
+                                    date=date,
+                                    transaction_status="success",
+                                    transaction_type="Debit"
+                                )
+                        app_tables.wallet_users_transaction.add_row(
+                            receiver_phone=senders_phone,
+                            phone=receiver_phone,
+                            fund=amount,
+                            date=date,
+                            transaction_type="Credit",
+                            transaction_status="success"
+                        )
+                        self.manager.show_notification('Success', "Money added successfully.")
+                        # toast("Money added successfully.")
+                        # self.manager.current = 'dashboard'
+                        # self.manager.show_balance()
+                        self.ids.purpose.text = ''
+                        self.ids.amount_field.text = ''
+                        self.ids.name.text = ''
+                        self.ids.mobile_no_field.text = ''
+                        self.ids.test_money.active = False
                     sender.update()
                 else:
-                    toast("balance is less than entered amount")
-                app_tables.wallet_users_transaction.add_row(
-                    receiver_phone=receiver_phone,
-                    phone=senders_phone,
-                    fund=amount,
-                    date=date,
-                    transaction_status="success",
-                    transaction_type="Debit"
-                )
-                app_tables.wallet_users_transaction.add_row(
-                    receiver_phone=senders_phone,
-                    phone=receiver_phone,
-                    fund=amount,
-                    date=date,
-                    transaction_type="Credit",
-                    transaction_status="success"
-                )
-                toast("Money added successfully.")
-                self.manager.current = 'dashboard'
-                # self.manager.show_balance()
-                self.ids.purpose.text = ''
-                self.ids.amount_field.text = ''
-                self.ids.name.text = ''
-                self.ids.mobile_no_field.text = ''
-                self.ids.test_money.active = False
+                    # toast("balance is less than entered amount")
+                    self.manager.show_notification('Alert!', "balance is less than entered amount.")
             else:
-                toast("you dont have a balance in this currency type", duration=5)
+                # toast("you dont have a balance in this currency type", duration=5)
+                self.manager.show_notification('Alert!', "you dont have a balance in this currency type.")
                 self.ids.purpose.text = ''
                 self.ids.amount_field.text = ''
                 self.ids.name.text = ''
                 self.ids.mobile_no_field.text = ''
                 self.ids.test_money.active = False
         except Exception as e:
-            toast("an error occurred", duration=5)
+            # toast("an error occurred", duration=5)
+            self.manager.show_notification('Alert!', "An error occurred. please try again.")
             self.ids.purpose.text = ''
             self.ids.amount_field.text = ''
             self.ids.name.text = ''
@@ -292,24 +300,24 @@ class TransferScreen(Screen):
             self.ids.test_money.active = False
             print(e)
 
-    def show_not_registered_dialog(self):
-        # Show a dialog indicating that the receiver's phone number is not registered
-        dialog = MDDialog(
-            title="Receiver Not Registered",
-            text="The provided phone number is not registered. Consider inviting the user to join.",
-            buttons=[
-                MDFlatButton(
-                    text="OK",
-                    on_release=lambda *args: dialog.dismiss()
-                )
-            ]
-        )
-        dialog.open()
-        self.ids.purpose.text = ''
-        self.ids.amount_field.text = ''
-        self.ids.name.text = ''
-        self.ids.mobile_no_field.text = ''
-        self.ids.test_money.active = False
+    # def show_not_registered_dialog(self):
+    #     # Show a dialog indicating that the receiver's phone number is not registered
+    #     dialog = MDDialog(
+    #         title="Receiver Not Registered",
+    #         text="The provided phone number is not registered. Consider inviting the user to join.",
+    #         buttons=[
+    #             MDFlatButton(
+    #                 text="OK",
+    #                 on_release=lambda *args: dialog.dismiss()
+    #             )
+    #         ]
+    #     )
+    #     dialog.open()
+    #     self.ids.purpose.text = ''
+    #     self.ids.amount_field.text = ''
+    #     self.ids.name.text = ''
+    #     self.ids.mobile_no_field.text = ''
+    #     self.ids.test_money.active = False
 
     def check_reg(self, phone):
         return app_tables.wallet_users.get(phone=phone)
