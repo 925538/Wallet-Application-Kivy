@@ -445,8 +445,10 @@ class UserDetailsScreen(Screen):
     def deduct_and_transfer(self, amount):
         print("deduct_and_transfer function called with text:", amount)
         # Convert amount to integer or float
+        if amount == '':
+            self.manager.show_notification('Alert!','Enter all Fields')
+            return
         amount = int(amount)
-
         date = datetime.now()
 
         # Fetch current user's data from wallet_users_balance
@@ -471,7 +473,8 @@ class UserDetailsScreen(Screen):
                     phone=int(self.current_user_phone),
                     fund=amount,
                     date=date,
-                    transaction_type="Debit"
+                    transaction_type="Debit",
+                    currency = 'INR'
                 )
 
                 # Fetch searched user's data from wallet_users_balance
@@ -492,7 +495,8 @@ class UserDetailsScreen(Screen):
                         phone=int(self.searched_user_phone),
                         fund=amount,
                         date=date,
-                        transaction_type="Credit"
+                        transaction_type="Credit",
+                        currency='INR'
                     )
                     Clock.schedule_once(lambda dt: self.clear_text_field(), 0.1)
 

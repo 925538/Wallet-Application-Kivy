@@ -265,6 +265,7 @@ class AutoTopupScreen(Screen):
         if self.auto_topup_card is None:
             # Create and add AutoTopupCard widget if not already created
             self.auto_topup_card = AutoTopupCard()
+            self.auto_topup_card.manager = self.manager
             self.add_widget(self.auto_topup_card)
             self.auto_topup_card.height = dp(285)
             self.auto_topup_card.opacity = 1
@@ -280,6 +281,7 @@ class AutoTopupScreen(Screen):
         if self.auto_topup_card is None:
             # Create and add AutoTopupCard widget if not already created
             self.auto_topup_card = ScheduledTopupCard()
+            self.auto_topup_card.manager = self.manager
             self.add_widget(self.auto_topup_card)
             self.auto_topup_card.height = dp(285)
             self.auto_topup_card.opacity = 1
@@ -575,6 +577,7 @@ class AutoTopupCard(MDCard):
                     date=date,
                     transaction_type=f"{currency} - Credit",
                     transaction_status="Minimum-Topups",
+                    currency = currency
                 )
 
                 # try:
@@ -912,6 +915,7 @@ class ScheduledTopupCard(MDCard):
                                 date=current_datetime,
                                 transaction_type=f"{currency} - Credit",
                                 transaction_status="Timely-Topups",
+                                currency = currency
                             )
                             user_table['last_auto_topup_time'] = current_datetime
                             try:

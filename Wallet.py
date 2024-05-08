@@ -371,8 +371,11 @@ class AddMoneyScreen(Screen):
             self.manager.show_notification('Alert!','An error occured. Please try again.')
         store = JsonStore('user_data.json')
         phone = store.get('user')['value']["phone"]
+        print('yes')
         balance_table = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency)
-        print(balance_table)
+        print('yes')
+        for i in balance_table:
+            print(i)
         # Check if the amount is within the specified range
         if 500 <= amount <= 100000:
             if balance_table is None:
@@ -397,14 +400,15 @@ class AddMoneyScreen(Screen):
                     fund=self.exchange_rate_value,
                     date=date,
                     transaction_type="Credit",
-                    transaction_status="Wallet-Topup"
+                    transaction_status="Wallet-Topup",
+                    currency = currency
                 )
                 # Show a success toast
                 # toast("Money added successfully.")
                 self.manager.show_notification('Success', "Money Added Successfully")
                 # self.manager.current = 'dashboard'
                 # self.manager.show_balance()
-                self.ids.balance_lbl.text = str(balance_table['balance'])
+                self.ids.balance_lbl.text = str(int(balance_table['balance']))
                 
 
             except Exception as e:
@@ -540,7 +544,14 @@ class AddMoneyScreen(Screen):
                 bank_name = ban_name['bank_name']
                 self.ids.bank_dropdown.text = bank_name
                 self.test(bank_name)
-
+    def called(self,currency):
+        store1 = JsonStore('user_data.json')
+        phone_no = store1.get('user')['value']["phone"]
+        user_data=app_tables.wallet_users.get(phone=phone_no)
+        total_balance = self.manager.get_total_balance(phone_no, currency)
+        self.ids.options_button.icon = self.options_button_icon_mapping[currency]
+        self.ids.options_button.disabled = True
+        self.ids.balance_lbl.text = f'{int(total_balance)}'
 class WalletApp(MDApp):
     def build(self):
         screen_manager = ScreenManager()

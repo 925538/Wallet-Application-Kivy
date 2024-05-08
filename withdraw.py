@@ -346,11 +346,12 @@ class WithdrawScreen(Screen):
                 phone=phone,
                 fund=amount,
                 date=date,
-                transaction_type="Debit"
+                transaction_type="Debit",
+                currency = currency
             )
 
             self.manager.show_notification('Success',"Withdrawal successful.")
-            self.ids.balance_lbl.text = str(balance_table['balance'])
+            self.ids.balance_lbl.text = str(int(balance_table['balance']))
             # self.manager.show_balance()
         except Exception as e:
             print(f"Error withdrawing money: {e}")
@@ -440,3 +441,13 @@ class WithdrawScreen(Screen):
                 bank_name = ban_name['bank_name']
                 self.ids.bank_dropdown.text = bank_name
                 self.test(bank_name)
+    
+    def called(self,currency):
+        store1 = JsonStore('user_data.json')
+        phone_no = store1.get('user')['value']["phone"]
+        user_data=app_tables.wallet_users.get(phone=phone_no)
+        total_balance = self.manager.get_total_balance(phone_no, currency)
+        self.ids.options_button.icon = self.options_button_icon_mapping[currency]
+        self.ids.options_button.text = currency
+        self.ids.options_button.disabled = True
+        self.ids.balance_lbl.text = f'{int(total_balance)}'

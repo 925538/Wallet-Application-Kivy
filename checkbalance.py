@@ -10,7 +10,9 @@ from anvil.tables import app_tables
 import os
 import anvil.server
 import traceback  # Import traceback module for printing exceptions
-
+from Wallet import AddMoneyScreen
+from withdraw import WithdrawScreen
+from kivymd.uix.menu import MDDropdownMenu
 
 KV = '''
 <BalanceScreen>:
@@ -44,12 +46,14 @@ for currency in ['INR', 'USD', 'EUR', 'GBP']:
 
     card_kv = f'''
                 MDCard:
+                    id:'{currency}'
                     orientation: 'vertical'
                     size_hint: None, None
                     size: "280dp", "100dp"
                     pos_hint: {{"center_x": .5}}
                     md_bg_color: [250/255, 250/255, 250/255, 1]  # Correct usage of color
                     radius:[20,20,20,20]
+                    on_release: root.dropdown(self,'{currency}')                            
                     canvas.before:
                         Color:
                             rgba: [137/255, 137/255, 137/255, 1]  # Border color
@@ -112,7 +116,13 @@ class BalanceScreen(Screen):
     def __init__(self, **kwargs):
         super(BalanceScreen, self).__init__(**kwargs)
         EventLoop.window.bind(on_keyboard=self.on_key)
-        self.fetch_balances()
+        
+        self.options_button_icon_mapping = {
+            "INR": "currency-inr",
+            "GBP": "currency-gbp",
+            "USD": "currency-usd",
+            "EUR": "currency-eur"
+        }
 
     def on_key(self, window, key, scancode, codepoint, modifier):
         # 27 is the key code for the back button on Android
@@ -120,6 +130,8 @@ class BalanceScreen(Screen):
             self.go_back()
             return True  # Indicates that the key event has been handled
         return False
+    def on_enter(self, *args):
+        self.fetch_balances()
 
     def fetch_balances(self):
         try:
@@ -161,5 +173,44 @@ class BalanceScreen(Screen):
         self.manager.add_widget(Factory.AddMoneyScreen(name='Wallet'))
         self.manager.current = 'Wallet'
 
+    def go_to_wallet(self,currency):
+        self.manager.add_widget(Factory.AddMoneyScreen(name='addmoney'))
+        sm = self.manager.get_screen('addmoney')
+        self.manager.current = 'addmoney'
+        sm.called(currency)
+        self.menu.dismiss()
+    
+    def dropdown(self,instance,currency):
+        self.menu_list = [
+                    {"viewclass": "OneLineListItem", "text": 'Withdraw',
+                     "on_release": lambda x=currency: self.go_to_withdraw(x)},
+                     {"viewclass": "OneLineListItem", "text": 'Wallet',
+                     "on_release": lambda x=currency: self.go_to_wallet(x)},
+                     {"viewclass": "OneLineListItem", "text": 'Transaction History',
+                     "on_release": lambda x=currency: self.go_to_transactions(x)}
+                ]
+
+        # Create and open the dropdown menu
+        self.menu = MDDropdownMenu(
+            caller=instance,
+            items=self.menu_list,
+            width_mult=4,
+            pos_hint = {'center_x':0.5,'center_y':0.5}
+        )
+        self.menu.open()
+
+    def go_to_withdraw(self,currency):
+        self.manager.add_widget(Factory.WithdrawScreen(name='withdraw'))
+        sm = self.manager.get_screen('withdraw')
+        self.manager.current = 'withdraw'
+        sm.called(currency)
+        self.menu.dismiss()
+
+    def go_to_transactions(self,currency):
+        self.manager.add_widget(Factory.Transaction(name='transaction'))
+        trans_screen = self.manager.get_screen('transaction')
+        trans_screen.get_transaction_history(currency)
+        self.manager.current = 'transaction'
+        self.menu.dismiss()
 
 Builder.load_string(KV)
