@@ -259,7 +259,8 @@ class TransferScreen(Screen):
                                     fund=amount,
                                     date=date,
                                     transaction_status="success",
-                                    transaction_type="Debit"
+                                    transaction_type="Debit",
+                                    currency = currency
                                 )
                         app_tables.wallet_users_transaction.add_row(
                             receiver_phone=senders_phone,
@@ -267,7 +268,8 @@ class TransferScreen(Screen):
                             fund=amount,
                             date=date,
                             transaction_type="Credit",
-                            transaction_status="success"
+                            transaction_status="success",
+                            currency = currency
                         )
                         self.manager.show_notification('Success', "Money added successfully.")
                         # toast("Money added successfully.")
