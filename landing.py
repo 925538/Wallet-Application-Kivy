@@ -58,7 +58,7 @@ Builder.load_string(
                     spacing: dp(10)
 
                     Image:
-                        source: "images/google-logo-9808.png"
+                        source: "images/google.png"
                         size_hint: None, None
                         size: "20dp", "25dp"  
 
@@ -89,7 +89,7 @@ Builder.load_string(
                     spacing: 10  # Adjust the spacing as needed
 
                     Image:
-                        source: "images/logo-facebookpng-32256.png"
+                        source: "images/facebook.png"
                         size_hint: None, None
                         size: "20dp", "25dp"
                         allow_stretch: True

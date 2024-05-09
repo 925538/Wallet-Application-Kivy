@@ -53,7 +53,7 @@ for currency in ['INR', 'USD', 'EUR', 'GBP']:
                     pos_hint: {{"center_x": .5}}
                     md_bg_color: [250/255, 250/255, 250/255, 1]  # Correct usage of color
                     radius:[20,20,20,20]
-                    on_release: root.dropdown(self,'{currency}')                            
+                    on_release: root.go_to_wallet('{currency}')                            
                     canvas.before:
                         Color:
                             rgba: [137/255, 137/255, 137/255, 1]  # Border color
@@ -148,7 +148,7 @@ class BalanceScreen(Screen):
     def fetch_and_update_balance(self, phone, currency):
         try:
             balance_table = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency)
-            balance = balance_table['balance']
+            balance = balance_table['balance'] if balance_table else print('0')
             print(f"Balance for {currency}: {balance}")  # Print balance
             label_id = f"{currency.lower()}_balance_label"
             if balance is None:
@@ -178,7 +178,7 @@ class BalanceScreen(Screen):
         sm = self.manager.get_screen('addmoney')
         self.manager.current = 'addmoney'
         sm.called(currency)
-        self.menu.dismiss()
+        # self.menu.dismiss()
     
     def dropdown(self,instance,currency):
         self.menu_list = [
