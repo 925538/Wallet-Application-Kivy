@@ -228,7 +228,7 @@ class ScreenManagement(ScreenManager):
             title=title,  # Remove default title
             content=content_layout,
             size_hint=(None, None),
-            size=(350, 270),
+            size=('250dp','250dp'),
             auto_dismiss=True,  # Close on touch outside the card
             background_color=(0.078, 0.557, 0.996, 1.0)
         )

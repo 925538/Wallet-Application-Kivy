@@ -50,6 +50,7 @@ from kivy.core.image import  Image as CoreImage
 import tempfile
 from io import BytesIO
 from PIL import Image as imga
+from kivymd.uix.label import MDIcon
 navigation_helper = """
 <DashBoardScreen>:
     MDNavigationLayout:
@@ -1418,7 +1419,12 @@ class DashBoardScreen(Screen):
                 transaction_date = transaction_date_str.split(' ')[0]
                 transactions_text = f"{transaction['receiver_phone']}"
                 fund_text = f"{transaction['fund']}"
-
+                currency_type = f"{transaction['currency']}"
+                fund_text = f"{round(transaction['fund'], 2)}"
+                fund_currency = f"{transaction['currency']}"
+                lowered_currency = fund_currency.lower()
+                fund_currency1 = f"currency-{lowered_currency}"
+                print(fund_currency1)
                 if transaction_date != current_date:
                     current_date = transaction_date
                     header_text = f"[b]{transaction_date}[/b]"
@@ -1431,7 +1437,7 @@ class DashBoardScreen(Screen):
 
                 # Add transaction details
                 transaction_item_widget = OneLineListItem(text=f"{transactions_text}", theme_text_color='Custom',
-                                                        text_color=[0, 0, 0, 1], divider=None)
+                                                        text_color=[0, 0, 0, 1], height=dp(25), divider=None)
                 transaction_container.add_widget(transaction_item_widget)
 
                 transaction_container.add_widget(Widget(size_hint_x=None, width=dp(20)))
@@ -1442,15 +1448,16 @@ class DashBoardScreen(Screen):
                 else:
                     fund_color = [1, 0, 0, 1]
                     sign = '-'
-
-                fund_label = MDLabel(text=f"{sign}₹{fund_text}", theme_text_color='Custom', text_color=fund_color,
+                icon = MDIcon(icon=fund_currency1, theme_text_color='Custom', text_color=fund_color,
+                            size_hint=(None, None), size=(dp(5), dp(5)), pos_hint={'center_y': 0.5, 'top': 0.7})
+                fund_label = MDLabel(text=f"{sign}{fund_text}", theme_text_color='Custom',
+                                    text_color=fund_color,
                                     halign='right', padding=(15, 15))
                 transaction_container.add_widget(fund_label)
-
+                transaction_container.add_widget(icon)
                 trans_screen.ids.transaction_list.add_widget(transaction_container)
         except Exception as e:
             print(f"Error getting transaction history: {e} ,{traceback.format_exc()}")
-            self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
     menu = None  # Add this line to declare the menu attribute
     options_button_icon_mapping = {

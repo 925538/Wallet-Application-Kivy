@@ -356,6 +356,7 @@ class AddMoneyScreen(Screen):
             if self.ids.options_button.icon == self.options_button_icon_mapping[i]:
                 global currency
                 currency=i
+        print(currency)
         if not bank_name != 'select bank account' or not amount or not currency:
             self.manager.show_notification('Alert!',"Please fill in all fields.")
             return
@@ -371,11 +372,7 @@ class AddMoneyScreen(Screen):
             self.manager.show_notification('Alert!','An error occured. Please try again.')
         store = JsonStore('user_data.json')
         phone = store.get('user')['value']["phone"]
-        print('yes')
         balance_table = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency)
-        print('yes')
-        for i in balance_table:
-            print(i)
         # Check if the amount is within the specified range
         if 500 <= amount <= 100000:
             if balance_table is None:
@@ -388,11 +385,13 @@ class AddMoneyScreen(Screen):
                 if balance_table["balance"] is not None:
                     new_e_money = self.exchange_rate_value + balance_table['balance']
                     balance_table['balance'] = new_e_money
-                    balance_table.update()
+                    balance_table.update()        
                 else:
                     new_e_money = self.exchange_rate_value
                     balance_table['balance'] = new_e_money
-                    balance_table.update()
+                    balance_table.update()        
+            self.ids.balance_lbl.text = str(int(balance_table['balance']))
+
             try:
                 app_tables.wallet_users_transaction.add_row(
                     receiver_phone=float(self.account_number),
@@ -408,8 +407,6 @@ class AddMoneyScreen(Screen):
                 self.manager.show_notification('Success', "Money Added Successfully")
                 # self.manager.current = 'dashboard'
                 # self.manager.show_balance()
-                self.ids.balance_lbl.text = str(int(balance_table['balance']))
-                
 
             except Exception as e:
                 print(f"Error adding money: {e}")
