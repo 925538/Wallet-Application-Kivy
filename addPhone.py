@@ -189,9 +189,9 @@ class AddPhoneScreen(Screen):
     current_user_phone = ""
 
     def go_back(self):
-        existing_screen = self.manager.get_screen('addphone')
+        # existing_screen = self.manager.get_screen('addphone')
         self.manager.current = 'dashboard'
-        self.manager.remove_widget(existing_screen)
+        # self.manager.remove_widget(existing_screen)
 
     def __init__(self, **kwargs):
         super(AddPhoneScreen, self).__init__(**kwargs)

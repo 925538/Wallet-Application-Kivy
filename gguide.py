@@ -45,8 +45,8 @@ Builder.load_string('''
                 
                 
             MDGridLayout:
-                cols: 5
-                rows: 1
+                cols: 2
+                rows: 4
                 spacing: dp(15)
                 size_hint: (None, None)  # Set size_hint to None
                 width: self.minimum_width  # Set width explicitly
@@ -59,7 +59,7 @@ Builder.load_string('''
                     orientation: "vertical"
                     size_hint: None, None
                     size: "180dp", "150dp"
-                    on_press: app.root.card_clicked(1)
+                    on_press: root.card_clicked(1)
                     pos_hint: {"center_x": 0.2, "center_y": 0.6}
                     
                     MDBoxLayout:
@@ -80,7 +80,7 @@ Builder.load_string('''
                     id: add_bank_card
                     size_hint: None, None
                     size: "180dp", "150dp"
-                    on_press: app.root.card_clicked(2)
+                    on_press: root.card_clicked(2)
                     
                     MDBoxLayout:
                         orientation: 'vertical'
@@ -100,7 +100,7 @@ Builder.load_string('''
                     id: transfer_money_card 
                     size_hint: None, None
                     size: "180dp", "150dp"
-                    on_press: app.root.card_clicked(3)
+                    on_press: root.card_clicked(3)
                     
                     MDBoxLayout:
                         orientation: 'vertical'
@@ -122,7 +122,7 @@ Builder.load_string('''
                     id: check_balance_card
                     size_hint: None, None
                     size: "180dp", "150dp"
-                    on_press: app.root.card_clicked(4)
+                    on_press: root.card_clicked(4)
                     
                     MDBoxLayout:
                         orientation: 'vertical'
@@ -154,13 +154,15 @@ Builder.load_string('''
                 width: self.minimum_width  # Set width explicitly
                 height: self.minimum_height  # Set height explicitly
                 pos_hint: {"center_x": 0.25, "center_y": 0.34}
+                adaptive_height:True
+                adaptive_width:True
         
                 MDCard:
                     orientation:"vertical"
                     id: recharge_card
                     size_hint: None, None
                     size: "180dp", "150dp"
-                    on_press: app.root.card_clicked(1)
+                    on_press: root.card_clicked(1)
                     
                     MDBoxLayout:
                         orientation: 'vertical'
@@ -180,7 +182,7 @@ Builder.load_string('''
                     id: electricity_card
                     size_hint: None, None
                     size: "180dp", "150dp"
-                    on_press: app.root.card_clicked(2)
+                    on_press: root.card_clicked(2)
                     
                     MDBoxLayout:
                         orientation: 'vertical'
@@ -219,7 +221,7 @@ Builder.load_string('''
                     size_hint: None, None
                     halign: 'left'
                     size: "180dp", "140dp"
-                    on_press: app.root.card_clicked(1)
+                    on_press: root.card_clicked(1)
                     
                     MDBoxLayout:
                         orientation: 'vertical'
