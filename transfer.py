@@ -1,3 +1,4 @@
+from turtle import onclick
 from kivy.metrics import dp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
@@ -24,6 +25,7 @@ kv_string = '''
             MDTopAppBar:
                 title: "Money Transfer"
                 anchor_title:'left'
+                right_action_items: [["", lambda x: None]]
                 left_action_items: [["arrow-left", lambda x: root.go_back()]]
                 md_bg_color: app.theme_cls.primary_color
                 specific_text_color: 1, 1, 1, 1
@@ -157,30 +159,6 @@ Builder.load_string(kv_string)
 
 class TransferScreen(Screen):
 
-    def show_currency_menu(self):
-        box = BoxLayout(orientation='vertical')
-
-        dropdown = DropDown()
-        currencies = ['INR', 'USD', 'EUR', 'GBP']
-        for currency in currencies:
-            btn = Button(text=currency, size_hint_y=None, height=44)
-            btn.bind(on_release=lambda btn: dropdown.select(btn.text))
-            dropdown.add_widget(btn)
-
-        mainbutton = Button(text='Currency', size_hint=(1, 1))
-        mainbutton.bind(on_release=dropdown.open)
-        dropdown.bind(on_select=lambda instance, x: setattr(mainbutton, 'text', x))
-
-        box.add_widget(mainbutton)
-        popup = Popup(
-            title='Select Currency',
-            content=dropdown,
-            size_hint=(None, None),
-            size=(200, 200)
-        )
-        popup.open()
-
-
     def go_back(self):
         existing_screen = self.manager.get_screen('transfer')
         self.manager.current = 'dashboard'
@@ -271,7 +249,7 @@ class TransferScreen(Screen):
                             transaction_status="success",
                             currency = currency
                         )
-                        self.manager.show_notification('Success', "Money added successfully.")
+                        self.manager.show_notification('Success', "Money transferred successfully.")
                         # toast("Money added successfully.")
                         # self.manager.current = 'dashboard'
                         # self.manager.show_balance()
@@ -329,22 +307,17 @@ class TransferScreen(Screen):
         menu_items = [{"text": currency, "viewclass": "OneLineListItem", "height": dp(44),
                        "on_release": lambda x=currency: self.test(x)} for currency in currencies]
 
-        menu = MDDropdownMenu(
+        self.menu = MDDropdownMenu(
             caller=self.ids.currency_spinner,
             items=menu_items,
             width_mult=4,
         )
 
-        def set_currency(instance_menu, instance_menu_item):
-            self.selected_currency = instance_menu_item.text
-            self.ids.currency_spinner.text = self.selected_currency
-            menu.dismiss()
-
-        menu.bind(on_release=set_currency)
-        menu.open()
+        self.menu.open()
 
     def test(self, text):
         self.ids.currency_spinner.text = text
+        self.menu.dismiss()
 
     def update_transfer_amount(self, active):
         if active:

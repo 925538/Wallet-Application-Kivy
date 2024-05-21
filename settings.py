@@ -162,9 +162,9 @@ Builder.load_string(KV)
 
 class SettingsScreen(Screen):
     def go_back(self):
-        existing_screen = self.manager.get_screen('settings')
+        # existing_screen = self.manager.get_screen('settings')
         self.manager.current = 'dashboard'
-        self.manager.remove_widget(existing_screen)
+        # self.manager.remove_widget(existing_screen)
 
     def __init__(self, **kwargs):
         super(SettingsScreen, self).__init__(**kwargs)

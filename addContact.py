@@ -76,9 +76,9 @@ class CustomMDTextField(MDTextField):
 
 class AddContactScreen(Screen):
     def go_back(self):
-        existing_screen = self.manager.get_screen('addcontact')
+        # existing_screen = self.manager.get_screen('addcontact')
         self.manager.current = 'dashboard'
-        self.manager.remove_widget(existing_screen)
+        # self.manager.remove_widget(existing_screen)
 
     def search(self):
         pass

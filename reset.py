@@ -95,42 +95,48 @@ class ResetPassword(Screen):
 
     def submit_password(self):
         # Get the current user's phone number from the stored user data
+        phone = JsonStore("user_data.json").get("user")["value"]['phone']
         current_user_password = JsonStore("user_data.json").get("user")["value"]["password"]
 
         # Get the user from the Anvil app_tables.wallet_users
-        user = app_tables.wallet_users.get(password=current_user_password)
+        user = app_tables.wallet_users.get(phone = phone,password=current_user_password)
+        try:
+            if user:
+                # Get the decrypted password from the user's data
+                # decrypted_password = anvil.server.call('load_secret_data', current_user_password,
+                #                                     self.ids.old_password_input.text)
 
-        if user:
-            # Get the decrypted password from the user's data
-            decrypted_password = anvil.server.call('load_secret_data', current_user_password,
-                                                   self.ids.old_password_input.text)
+                if current_user_password == self.ids.old_password_input.text:
+                    # Previous password is correct, update with the new password
+                    # new_encrypted_password = anvil.server.call("save_secret_data", self.ids.new_password_input.text)
+                    user.update(password=self.ids.new_password_input.text)
 
-            if decrypted_password == self.ids.old_password_input.text:
-                # Previous password is correct, update with the new password
-                new_encrypted_password = anvil.server.call("save_secret_data", self.ids.new_password_input.text)
-                user.update(password=new_encrypted_password)
+                    # Show a success pop-up
+                    # dialog = MDDialog(
+                    #     title="Success",
+                    #     text="Password updated successfully!",
+                    #     buttons=[
+                    #         MDFlatButton(
+                    #             text="OK",
+                    #             on_release=lambda *args: (dialog.dismiss(), self.go_back())
+                    #         )
+                    #     ]
+                    # )
+                    # dialog.open()
+                    self.manager.show_notification('Success',"Password updated successfully.")
 
-                # Show a success pop-up
-                # dialog = MDDialog(
-                #     title="Success",
-                #     text="Password updated successfully!",
-                #     buttons=[
-                #         MDFlatButton(
-                #             text="OK",
-                #             on_release=lambda *args: (dialog.dismiss(), self.go_back())
-                #         )
-                #     ]
-                # )
-                # dialog.open()
-                self.manager.show_notification('Success',"Password updated successfully.")
+                else:
+                    # Show an error pop-up for incorrect previous password
+                    # self.show_error_popup("Incorrect previous password. Please try again.")
+                    self.manager.show_notification('Alert!',"Incorrect previous password. Please try again.")
             else:
-                # Show an error pop-up for incorrect previous password
-                # self.show_error_popup("Incorrect previous password. Please try again.")
-                self.manager.show_notification('Alert!',"Incorrect previous password. Please try again.")
-        else:
             # Handle the case where the user is not found
-            print("User not found.")
-            self.manager.show_notification('Alert!','User not found.')
+                print("User not found.")
+                self.manager.show_notification('Alert!','User not found.')
+        except Exception as e:
+            print(e)
+            self.manager.show_notification('Alert!','An error occured.')
+        
 
     def show_error_popup(self, error_text):
         # Show an error pop-up

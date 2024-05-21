@@ -112,6 +112,7 @@ class ReferFriendScreen(Screen):
             self.ids.textinput2.text = user['userreferral']
 
     def copy_code(self):
+        from kivy.utils import ask
         code_to_copy = self.ids.textinput2.text
         pyperclip.copy(code_to_copy)
 

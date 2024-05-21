@@ -139,9 +139,9 @@ class AutoTopupScreen(Screen):
         EventLoop.window.bind(on_keyboard=self.on_key)
 
     def go_back(self):
-        existing_screen = self.manager.get_screen('auto_topup')
+        # existing_screen = self.manager.get_screen('auto_topup')
         self.manager.current = 'dashboard'
-        self.manager.remove_widget(existing_screen)
+        # self.manager.remove_widget(existing_screen)
     
     def on_key(self, window, key, scancode, codepoint, modifier):
         # 27 is the key code for the back button on Android
@@ -538,12 +538,14 @@ class AutoTopupCard(MDCard):
             currency = currency_dropdown.text
             rate_response = self.currency_rate(currency, amount)
             print(rate_response)
-            if 'response' in rate_response and rate_response['meta']['code'] == 200:
-                # Access the 'value' from the 'response' dictionary
-                self.exchange_rate_value = rate_response['response']['value']
-                print(f"The exchange rate value is: {self.exchange_rate_value}")
-            else:
-                print("Error fetching exchange rates.")
+            try:
+                if 'response' in rate_response and rate_response['meta']['code'] == 200:
+                    # Access the 'value' from the 'response' dictionary
+                    self.exchange_rate_value = rate_response['response']['value']
+                    print(f"The exchange rate value is: {self.exchange_rate_value}")
+                # else:
+                #     print("Error fetching exchange rates.")
+            except Exception as e:
                 self.manager.show_notification('Alert!','An error occurred. Please try again.')
             store = JsonStore('user_data.json')
             phone = store.get('user')['value']["phone"]

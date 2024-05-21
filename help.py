@@ -54,9 +54,9 @@ Builder.load_string(KV)
 
 class HelpScreen(Screen):
     def go_back(self):
-        existing_screen = self.manager.get_screen('help')
+        # existing_screen = self.manager.get_screen('help')
         self.manager.current = 'dashboard'
-        self.manager.remove_widget(existing_screen)
+        # self.manager.remove_widget(existing_screen)
 
     def __init__(self, **kwargs):
         super(HelpScreen, self).__init__(**kwargs)
