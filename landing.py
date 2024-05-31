@@ -1,143 +1,120 @@
 from kivy.factory import Factory
 from kivy.lang import Builder
+from kivy.properties import ListProperty
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivymd.app import MDApp
+from kivymd.uix.button import MDRaisedButton
+
 from signin import SignInScreen
 from signup import SignUpScreen
+class CustomMDRaisedButton(MDRaisedButton):
+    radius = ListProperty([25, 25, 25, 25])
+
 Builder.load_string(
     """
 <LandingScreen>:
     canvas.before:
         Color:
-            rgba: 1, 1, 1, 1
+            rgba: 1,1,1,1
         Rectangle:
             size: self.size
             pos: self.pos
 
+    Widget:
+        size_hint_y:None
+        height:"20dp"
 
     BoxLayout:
-        orientation: "vertical"
-        padding: dp(35)
-        spacing: dp(35)  # Adjusted spacing between labels and image
-
-        MDLabel:
-            text: ""
-
-            theme_text_color: 'Custom'
-            text_color: 0, 0, 0, 1
-            bold: True
-
+        orientation: "horizontal"
+        padding: dp(20)
+        # spacing: dp(20)
+        # pos_hint:{"top":1}
+        minimum_width:100
 
         Image:
             source: "images/2.png"
-            pos_hint: {'center_x': 0.5, 'center_y': 0.85}
+            pos_hint: {'center_x': 0.17,'center_y':0.9}
             size_hint: None, None
-            size: "80dp", "80dp"
+            size: "60dp", "60dp"
+
+
+    BoxLayout:
+        size_hint: 1, None
+        height: self.minimum_height
+        padding: "20dp"
+        spacing: "20dp"
+        orientation: 'vertical'
+        pos_hint: {'center_x': 0.5,'center_y':0.32}
 
 
 
+        BoxLayout:
+            # size_hint: 1, None
+            padding: "1dp"
+            orientation: 'horizontal'
+            # pos_hint: {'center_x': 0.5,'center_y':0.3}
+            minimum_width:100
 
-        GridLayout:
-            cols: 2
-            spacing: dp(20)
-            padding: dp(20)
-            pos_hint: {'center_x': 0.52, 'center_y': 0.8} 
+            MDLabel:
+                text: "G-Wallet"
+                font_size: 50
+                # halign: "center"
+                bold: True
+                # color: 1,1,1,1
+
+                # pos_hint: {'center_x': 0.12}
+                # font_name: "Roboto-Bold"
+
+
+        Widget:
+            size_hint_y:None
+            height:"30dp"
+
+
+        MDLabel:
+            text: "Seamlessly send and receive money in multiple currencies with just a few taps."
+            font_size: 34
+            # halign: "center"
+            # bold: True
+            pos_hint: {'center_x': 0.5}
+            multiline:True
+            width:"170dp" 
+            # color: 1,1,1,1
+
+
+        Widget:
+            size_hint_y:None
+            height:"70dp"
+
+
+
+        MDFillRoundFlatButton:
+            text: "LOGIN"
+            on_release: root.nav_sign_in()
+            md_bg_color: "#148efe"
+            theme_text_color: 'Custom'
+            # text_color: 1, 1, 1, 1
+            font_size:"18sp"
             size_hint: 1, None
+            height: "15dp"
+            font_name: "Roboto-Bold"
+            radius: [25, 25, 25, 25]
 
-            MDRaisedButton:
-                md_bg_color: 1,1,1,1
-                theme_text_color: 'Custom'
-                text_color: 0, 0, 0, 1
-                size_hint: 1, None
-                height: "50dp"
-                line_color: 0, 0, 0, 1  
-                line_width: 1
-
-                BoxLayout:
-                    orientation: 'horizontal'
-                    spacing: dp(10)
-
-                    Image:
-                        source: "images/google.png"
-                        size_hint: None, None
-                        size: "20dp", "25dp"  
-
-                    MDLabel:
-                        text: "  Sign In with Google"
-
-                        theme_text_color: 'Custom'
-                        text_color: 0, 0, 0, 1
-                        pos_hint: {'center_x': 0.8, 'center_y': 0.5}
-                        bold: True
-
-        GridLayout:
-            cols: 2
-            spacing: dp(20)
-            padding: dp(20)
-            pos_hint: {'center_x': 0.52, 'center_y': 0.7} 
+        MDFillRoundFlatButton:
+            text: "SIGNUP"
+            on_release: root.nav_sign_up()
+            md_bg_color: "#148efe"
             size_hint: 1, None
+            font_size:"18sp"
+            # md_bg_color: app.theme_cls.primary_light
+            height: "15dp"
+            font_name: "Roboto-Bold"
+            radius: [25, 25, 25, 25]
+        Widget:
+            size_hint_y:None
+            height:"190dp"
 
-            MDRaisedButton:
-                rgba: "#1877F2"
-                theme_text_color: 'Custom'
-                text_color: 1, 1, 1, 1
-                size_hint: 1, None
-                height: "50dp"
 
-                BoxLayout:
-                    orientation: 'horizontal'
-                    spacing: 10  # Adjust the spacing as needed
-
-                    Image:
-                        source: "images/facebook.png"
-                        size_hint: None, None
-                        size: "20dp", "25dp"
-                        allow_stretch: True
-                        keep_ratio: True
-
-                    MDLabel:
-                        text: "  Sign In with Facebook"
-                        theme_text_color: 'Custom'
-                        text_color: 1, 1, 1, 1
-                        pos_hint: {'center_x': 0.8, 'center_y': 0.5}
-                        bold: True
-
-        Label:
-            text: ""
-
-        GridLayout:
-            cols: 2
-            spacing: dp(20)
-            padding: dp(20)
-            pos_hint: {'center_x': 0.50, 'center_y': 0.6}  # Adjusted y-value
-            size_hint: 1, None
-            height: "50dp"
-
-            MDRaisedButton:
-                text: "Login"
-                on_release: root.nav_sign_in()
-                rgba: "#1877F2"
-                theme_text_color: 'Custom'
-                text_color: 1, 1, 1, 1
-                size_hint: 1, None
-                height: "50dp"
-                font_name: "Roboto-Bold"
-
-            MDRaisedButton:
-                text: "Sign Up"
-                on_press: root.nav_sign_up()
-                rgba: "#1877F2"
-                pos_hint: {'right': 1, 'y': 0.5}
-                size_hint: 1, None
-                height: "50dp"
-                font_name: "Roboto-Bold"
-        Label:
-            text: ""
-
-        Label:
-            text: ""
-        Label:
-            text: ""
 """
 )
 
@@ -152,6 +129,8 @@ class LandingScreen(Screen):
     def nav_sign_up(self):
         self.manager.add_widget(Factory.SignUpScreen(name='signup'))
         self.manager.current = 'signup'
+
+
 class WalletApp(MDApp):
     def build(self):
         screen_manager = ScreenManager()

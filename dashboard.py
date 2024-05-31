@@ -1,7 +1,4 @@
-import base64
-import io
 import traceback
-
 from kivy.uix.screenmanager import SlideTransition
 from kivy.utils import platform
 import qrcode
@@ -47,9 +44,7 @@ from autotopup import AutoTopupScreen
 from qrscanner import ScanScreen
 from newQR import QRCodeScreen
 from kivy.core.image import  Image as CoreImage
-import tempfile
 from io import BytesIO
-from PIL import Image as imga
 from kivymd.uix.label import MDIcon
 navigation_helper = """
 <DashBoardScreen>:
@@ -946,21 +941,19 @@ class ContentNavigationDrawer(MDBoxLayout):
 class DashBoardScreen(Screen):
 
     def on_enter(self, *args):
-
         self.ids.email_label.text = str(JsonStore('user_data.json').get('user')['value']['email'])
         self.ids.username_label.text = JsonStore('user_data.json').get('user')['value']['username']
+
+    def user_pic(self):
         store = JsonStore('user_data.json').get('user')['value']['phone']
         table = app_tables.wallet_users.get(phone=store)
         image_stored = table['profile_pic']
-        if image_stored:
-            decoded_image_bytes = base64.b64decode(image_stored)
-            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
-                temp_file_path = temp_file1.name
-                # Write the decoded image data to the temporary file
-                temp_file1.write(decoded_image_bytes)
-                # Close the file to ensure the data is flushed and saved
-                temp_file1.close()
-            self.ids.user_image.source = temp_file_path
+        if image_stored :
+            print('yes in users')
+            decoded_image_bytes =image_stored.get_bytes()
+            core_image =  CoreImage(BytesIO(decoded_image_bytes), ext='png',filename='image.png')
+            print(core_image)
+            self.ids.user_image.texture = core_image.texture
 
     def get_username(self):
         store = JsonStore('user_data.json').get('user')['value']
