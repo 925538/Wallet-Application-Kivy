@@ -43,7 +43,7 @@ class ScreenManagement(ScreenManager):
             requests.get("http://www.google.com", timeout=5)
 
             # If there is an internet connection, connect to Anvil server
-            client = anvil.server.connect("server_7JA6PVL5DBX5GSBY357V7WVW-TLZI2SSXOVZCVYDM")#server_XJ2JS6XNM4DAGJAXLUYLU4DU-AU4ETOLISIFV3CR3
+            client = anvil.server.connect("server_7JA6PVL5DBX5GSBY357V7WVW-TLZI2SSXOVZCVYDM")# server_HCPXSEPK7H5QFVBH5DD4CAWG-CQAJC3TXYQYKC5WX
 
             # Schedule the login status check after 5 seconds
             Clock.schedule_once(self.check_login_status, 5)
@@ -56,20 +56,31 @@ class ScreenManagement(ScreenManager):
 
 
     def check_login_status(self, dt):
-        store = JsonStore('user_data.json')
-        self.remove_widget(self.get_screen('loading'))
-        if 'user' in store:
-            self.add_widget(Factory.DashBoardScreen(name='dashboard'))
-            self.current = "dashboard"
-            self.get_username()
-            #self.fetch_and_update_navbar()
-            self.fetch_and_update_complaint()
-            self.fetch_and_update_addPhone()
-            #self.show_balance()
-            # ... add other screens as needed
-        else:
-            self.add_widget(Factory.LandingScreen(name='landing'))
-            self.current = "landing"
+        try:
+            store = JsonStore('user_data.json')
+            self.remove_widget(self.get_screen('loading'))
+            if 'user' in store:
+                phone = JsonStore('user_data.json').get('user')['value']['phone']
+                print('yes')
+                self.add_widget(Factory.DashBoardScreen(name='dashboard'))
+                self.current = "dashboard"
+                users = app_tables.wallet_users.get(phone = phone)
+                try:
+                    if users['profile_pic'] is not None:
+                        self.current_screen.user_pic()
+                except Exception as e:
+                    print(e)
+                self.get_username()
+                #self.fetch_and_update_navbar()
+                self.fetch_and_update_complaint()
+                self.fetch_and_update_addPhone()
+                #self.show_balance()
+                # ... add other screens as needed
+            else:
+                self.add_widget(Factory.LandingScreen(name='landing'))
+                self.current = "landing"
+        except Exception as e:
+            print(e)
 
     # def connect_to_server(self):
     #     if self.is_internet_connected():

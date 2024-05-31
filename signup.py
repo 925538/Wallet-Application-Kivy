@@ -202,18 +202,19 @@ class SignUpScreen(Screen):
                 )
 
                 # Show a popup with a success message
-                dialog = MDDialog(
-                    title="Alert",
-                    buttons=[
-                        MDFlatButton(
-                            text="OK",
-                            on_release=lambda *args: (dialog.dismiss(), self.dismiss_and_navigate())
-                        )
-                    ]
-                )
-                dialog.text = f"Successfully signed up."
-                dialog.open()
+                # dialog = MDDialog(
+                #     title="Alert",
+                #     buttons=[
+                #         MDFlatButton(
+                #             text="OK",
+                #             on_release=lambda *args: (dialog.dismiss(), self.dismiss_and_navigate())
+                #         )
+                #     ]
+                # )
+                # dialog.text = f"Successfully signed up."
+                # dialog.open()
                 self.manager.show_notification('Success','Successfully signed up.')
+                self.dismiss_and_navigate()
 
                 self.ids.address.text = ''
                 self.ids.pan_card.text = ''

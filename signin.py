@@ -2,6 +2,7 @@ import re
 import sqlite3
 from datetime import datetime
 from anvil.tables import app_tables
+from kivy.base import EventLoop
 from kivy.factory import Factory
 from kivy.lang import Builder
 from kivy.metrics import dp
@@ -10,66 +11,204 @@ from kivymd.toast import toast
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.screen import Screen
-from kivy.base import EventLoop
+from kivy.core.image import  Image as CoreImage
+from io import BytesIO
 from kivy.core.window import Keyboard
 
 KV = """
 <SignInScreen>:
-    Screen:
-        MDTopAppBar:
-            left_action_items: [["arrow-left", lambda x: root.go_back()]]
-            title: 'Login'
-            anchor_title:'left'
-            # md_bg_color: "#1e75b9"
-            specific_text_color: "#ffffff"
-            pos_hint: {'top':1}
+    MDScreen:
+
+        MDIconButton:
+            icon: "close"
+            pos_hint: {"top": 1, "left": 1}
+            on_release: root.go_back()
+            user_font_size: "100sp"
+            theme_text_color: "Custom"
+            text_color: rgba(53,56,64,255)
+
+        Widget:
+            size_hint_y: None
+            height: '10dp'
 
         BoxLayout:
-            orientation: 'vertical'
-            padding: dp(10)
-            spacing: dp(20)
             size_hint_y: None
-            height: dp(200)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.4}
+            height: self.minimum_height
+            padding: "10dp"
+            spacing: "20dp"
+            orientation: 'vertical'
 
-            Image:
-                source: 'images/login.jpg'  # Update with your image file path
+            MDLabel:
+                text: "LOGIN"
+                font_size: 46
+                halign: "center"
+                bold: True
+
+            Widget:
                 size_hint_y: None
-                height: dp(170)  # Adjust the height as needed
-                pos_hint: {'center_x': 0.5}
+                height: '0.5dp'
 
             MDTextField:
                 id: input_text
-                hint_text: "  Mobile Number/Email ID"
-                mode: "rectangle"
-                radius:[25,25,25,25]
+                hint_text: "Mobile Number/Email ID"
                 helper_text: "Enter your mobile number, user ID, or email ID"
+                icon_left: "account"
                 helper_text_mode: "on_focus"
+                specific_text_color: "#ffffff"
+                pos_hint: {"center_x": .5}
                 multiline: False
-                #required: True
-                fill_color: 255//1, 0, 0, 0.5 
+                radius: (20, 20, 20, 20)
+                mode: "rectangle"
+                color_active: 1, 1, 1, 1
+                normal_color: app.theme_cls.accent_color
+                line_color_normal: colors['Gray']['500']
 
             MDTextField:
                 id: password_input
-                hint_text: "  Password"
+                hint_text: "Password"
                 helper_text: "Enter your password"
-                mode: "rectangle"
-                radius:[25,25,25,25]
+                specific_text_color: "#ffffff"
+                icon_left: "lock"
                 helper_text_mode: "on_focus"
-                password: True
+                pos_hint: {"center_x": .5}
                 multiline: False
-                #required: True
-                #icon_right:"eye"
-                #on_right_icon: app.toggle_password_visibility()
+                radius: (20, 20, 20, 20)
+                mode: "rectangle"
+                color_active: 1, 1, 1, 1
+                normal_color: app.theme_cls.accent_color
+                line_color_normal: colors['Gray']['500']
 
-            MDRectangleFlatButton:
+            MDTextButton:
+                text: "     Forgot Password?"
+                font_size: "12sp"
+                bold: True
+                halign: "left"
+                theme_text_color: "Custom"
+                text_color: 0.117, 0.459, 0.725, 1
+                on_release: root.nav_reset()
+                
+
+            MDFillRoundFlatButton:
                 text: "Login"
+                pos_hint: {"center_x": .5}
                 on_release: root.sign_in(input_text.text, password_input.text)
-                size_hint_x: None
-                width: "150dp"
-                pos_hint: {'center_x': 0.5}
+                size_hint: 1, None
+                height: dp(48)
 
+            Widget:
+                size_hint_y: None
+                height: '0.7dp'
+
+            MDGridLayout:
+                cols: 3
+                size_hint: .8, None
+                height: self.minimum_height
+                pos_hint: {'center_x': .5}
+            
+                MDSeparator:
+                    size_hint: (None, None)
+                    width: self.parent.width / 3 - dp(10)
+                    height: dp(1)
+                    color: rgba(47, 144, 237, 255)
+            
+                MDLabel:
+                    text: "OR"
+                    font_size: "12sp"
+                    halign: "center"
+                    valign: "center"
+                    # size_hint_y: None
+                    # height: self.texture_size[1]
+                    color: rgba(5, 5, 6, 255)
+                    pos_hint:{"center_y":0.1}
+            
+                MDSeparator:
+                    size_hint: (None, None)
+                    width: self.parent.width / 3 - dp(10)
+                    height: dp(1)
+                    color: rgba(47, 144, 237, 255)
+                                
+            Widget:
+                size_hint_y: None
+                height: '2dp'
+                
+
+            MDLabel:
+                text: "Social Media Login"
+                # bold: True
+                font_size: "13sp"
+                halign: "center"
+                color: rgba(5, 5, 6)
+
+            Widget:
+                size_hint_y: None
+                height: "1dp"
+
+            FloatLayout:
+
+                MDIconButton:
+                    icon: 'images/google.png'
+                    user_font_size: '64sp'
+                    pos_hint: {'center_x': 0.34, 'center_y': 0.5}
+                    on_release: app.open_link()
+
+                MDIconButton:
+                    icon: 'images/facebook.png'
+                    user_font_size: '64sp'
+                    pos_hint: {'center_x': 0.50, 'center_y': 0.5}
+                    on_release: app.open_link()
+                    
+                MDIconButton:
+                    icon: 'images/instagram.jpg'
+                    user_font_size: '64sp'
+                    pos_hint: {'center_x': 0.66, 'center_y': 0.5}
+                    on_release: app.open_link()
+                    
+            Widget:
+                size_hint_y: None
+                height: "0.7dp"
+
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint: 1.1,None
+                height: self.minimum_height
+                spacing: dp(1) 
+                Widget:
+                    size_hint_x: None
+                    height: '1dp'
+                
+                # Widget:
+                #     size_hint_y: None
+                #     height: dp(3)
+                
+                MDLabel:
+                    text: "Dont have an account?"
+                    font_size: "11sp"
+                    theme_text_color: "Primary"
+                    halign: 'right'
+                    height: self.texture_size[1] + dp(2)
+                    
+                MDTextButton:
+                    text: "  Sign Up"
+                    font_size: "12sp"
+                    halign: 'center'
+                    underline:True
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(2)  # Adjust padding
+                    bold:True
+                    theme_text_color: "Custom"
+                    text_color: 0.117, 0.459, 0.725, 1
+                    on_press: root.nav_sign_up()
+                    
+                Widget:
+                    size_hint_y: None
+                    height: dp(10)
+
+
+            Widget:
+                size_hint_y: None
+                height: dp(30)
 """
+
 Builder.load_string(KV)
 
 
@@ -82,8 +221,8 @@ class SignInScreen(Screen):
         self.manager.current = 'landing'
         self.manager.remove_widget(existing_screen)
 
-    def __init__(self, **kwargs):
-        super(SignInScreen, self).__init__(**kwargs)
+    def init(self, **kwargs):
+        super(SignInScreen, self).init(**kwargs)
         EventLoop.window.bind(on_keyboard=self.on_key)
 
     def on_key(self, window, key, scancode, codepoint, modifier):
@@ -118,6 +257,7 @@ class SignInScreen(Screen):
                     # Now 'user' contains the Anvil row
                     self.user.update(last_login=date)
                     user_data = dict(self.user)
+                    user_data['profile_pic'] = None
                     user_data['last_login'] = str(user_data['last_login'])
                     self.user.update(last_login=date)
                     print(user_data)
@@ -138,7 +278,18 @@ class SignInScreen(Screen):
                         # App.get_running_app().authenticated_user_number = row['phone']
                         existing_screen = self.manager.get_screen('signin')
                         self.manager.add_widget(Factory.DashBoardScreen(name='dashboard'))
-                        self.manager.current = 'dashboard'
+                        dashboard = self.manager.get_screen('dashboard')
+                        try:
+                            image_stored = self.user['profile_pic']
+                            if image_stored :
+                                print('yes in users')
+                                decoded_image_bytes =image_stored.get_bytes()
+                                core_image =  CoreImage(BytesIO(decoded_image_bytes), ext='png',filename='image.png')
+                                print(core_image)
+                                dashboard.ids.user_image.texture = core_image.texture
+                        except Exception as e:
+                            print(e)
+                        self.manager.current='dashboard'
                         self.manager.remove_widget(existing_screen)
 
                         # Save user data to JsonStore (if needed)
@@ -195,3 +346,11 @@ class SignInScreen(Screen):
         dialog.open()
         self.ids.input_text.text = ''
         self.ids.password_input.text = ''
+
+    def nav_reset(self):
+        self.manager.add_widget(Factory.ResetPassword(name='reset'))
+        self.manager.current = 'reset'
+
+    def nav_sign_up(self):
+        self.manager.add_widget(Factory.SignUpScreen(name='signup'))
+        self.manager.current = 'signup'

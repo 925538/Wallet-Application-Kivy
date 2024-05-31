@@ -7,7 +7,7 @@
 # from os import path
 from ast import Global
 import platform
-
+import anvil
 from certifi import where
 from kivy.app import App
 from kivy.factory import Factory
@@ -431,37 +431,44 @@ class Profile(Screen):
                                 # print('yoo man')
                                 image_bytes = byte_stream.getvalue()
                                 byte_stream.seek(0)
-                                image_data = byte_stream.read()
+                                # byte_stream.seek(0)
+                                # image_data = byte_stream.read()
+                                # byte_stream.seek(0)
+                                
                             # print('before saving')
-                            dashboard_screen.ids.user_image.texture = CoreImage(BytesIO(image_data), ext='png',
-                                                                                filename='image.png').texture
+                            dashboard_screen.ids.user_image.source = temp_image_path1   #texture = CoreImage(BytesIO(image_data), ext='png',
+                                                                                            #filename='image.png').texture
                             self.ids.profile.icon = temp_image_path1
-                            image_base64 = base64.b64encode(image_bytes).decode('utf-8')
-                            table.update(profile_pic=None)
-                            table.update(profile_pic=image_base64)
+                            # image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+                            
+                            pic = anvil.BlobMedia(content_type="image/png", content=image_bytes)
+                            table.update(profile_pic = pic)
+                            # dashboard_screen.user_pic()
+                            print('yes updated')
                             break
                 else:
                     try:
                         with Image.open(temp_image_path) as img:
                             with BytesIO() as byte_stream:
                                 img.save(byte_stream, format='PNG')
-                                byte_stream.seek(0)
-                                imagee_data = byte_stream.read()
                                 imagee_byte = byte_stream.getvalue()
+                                # byte_stream.seek(0)
+                                # imagee_data = byte_stream.read()
+                                # byte_stream.seek(0)
                                 # print('yes continued ')
                         # converting to base64
-                        imagee_base64 = base64.b64encode(imagee_byte).decode('utf-8')
+                        # imagee_base64 = base64.b64encode(imagee_byte).decode('utf-8')
                         print('yes 2')
                         # clearing previous data
-                        table.update(profile_pic=None)
+                        
                         # print('yes 3')
                         # updating table  in database
-                        table.update(profile_pic=imagee_base64)
+                        picc = anvil.BlobMedia(content_type="image/png", content=imagee_byte)
+                        table.update(profile_pic = picc)
+                        print('yes updated1')
                         # print('yes 4')
                         # providing image to the dashboard screen
-                        dashboard_screen.ids.user_image.texture = CoreImage(BytesIO(imagee_data), ext='png',
-                                                                            filename='image.png').texture
-                        print('yes 5')
+                        dashboard_screen.ids.user_image. source=temp_image_path
                         self.ids.profile.icon = temp_image_path
                     except Exception as e:
                         print(e)
@@ -477,7 +484,7 @@ class Profile(Screen):
         table = app_tables.wallet_users.get(phone=store)
         image_stored = table['profile_pic']
         if image_stored:
-            decoded_image_bytes = base64.b64decode(image_stored)
+            decoded_image_bytes =image_stored.get_bytes()
             with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
                 temp_file_path = temp_file1.name
                 # Write the decoded image data to the temporary file
