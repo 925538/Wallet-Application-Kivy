@@ -1,3 +1,5 @@
+from multiprocessing.spawn import import_main_path
+from operator import imod
 import traceback
 from kivy.uix.screenmanager import SlideTransition
 from kivy.utils import platform
@@ -46,6 +48,10 @@ from newQR import QRCodeScreen
 from kivy.core.image import  Image as CoreImage
 from io import BytesIO
 from kivymd.uix.label import MDIcon
+from kivy.uix.button import Button
+from kivy.uix.anchorlayout import AnchorLayout
+
+import tempfile
 navigation_helper = """
 <DashBoardScreen>:
     MDNavigationLayout:
@@ -59,6 +65,7 @@ navigation_helper = """
                     #md_bg_color: "#fe5016"
 
                     MDTopAppBar:
+                        id:Appbar
                         title: "[b][color=#ffffff]G WALLET[/color][/b]"
                         theme_text_color: "Custom"
                         text_color: 1, 1, 1, 1
@@ -941,13 +948,13 @@ class ContentNavigationDrawer(MDBoxLayout):
 class DashBoardScreen(Screen):
 
     def on_enter(self, *args):
-        self.ids.email_label.text = str(JsonStore('user_data.json').get('user')['value']['email'])
-        self.ids.username_label.text = JsonStore('user_data.json').get('user')['value']['username']
+        self.ids.email_label.text = str(JsonStore('user_data.json').get('user')['value']['users_email'])
+        self.ids.username_label.text = JsonStore('user_data.json').get('user')['value']['users_username']
 
     def user_pic(self):
-        store = JsonStore('user_data.json').get('user')['value']['phone']
-        table = app_tables.wallet_users.get(phone=store)
-        image_stored = table['profile_pic']
+        store = JsonStore('user_data.json').get('user')['value']['users_phone']
+        table = app_tables.wallet_users.get(users_phone=store)
+        image_stored = table['users_profile_pic']
         if image_stored :
             print('yes in users')
             decoded_image_bytes =image_stored.get_bytes()
@@ -955,9 +962,17 @@ class DashBoardScreen(Screen):
             print(core_image)
             self.ids.user_image.texture = core_image.texture
 
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
+                temp_file_path = temp_file1.name
+                # Write the decoded image data to the temporary file
+                temp_file1.write(decoded_image_bytes)
+                # Close the file to ensure the data is flushed and saved
+                temp_file1.close()
+            self.ids.Appbar.right_action_items = [[f'{temp_file_path}', lambda x: self.manage_acc()]]
+
     def get_username(self):
         store = JsonStore('user_data.json').get('user')['value']
-        return store["username"]
+        return store["users_username"]
 
     def go_back(self):
         self.manager.current = 'dashboard'
@@ -1027,12 +1042,12 @@ class DashBoardScreen(Screen):
     def fetch_and_update_profile(self):
         # Get user data from the JsonStore
         store = JsonStore('user_data.json').get('user')['value']
-        username = store["username"]
-        gmail = store["email"]
-        phone = store["phone"]
-        aadhaar = store["aadhar"]
-        address = store["address"]
-        pan = store["pan"]
+        username = store["users_username"]
+        gmail = store["users_email"]
+        phone = store["users_phone"]
+        aadhaar = store["users_aadhar"]
+        address = store["users_address"]
+        pan = store["users_pan"]
 
         # Add the Profile screen to the ScreenManager if not added already
         if 'profile' not in self.manager.screen_names:
@@ -1096,7 +1111,7 @@ class DashBoardScreen(Screen):
 
     def account_details_exist(self, phone):
         try:
-            return app_tables.wallet_users_account.search(phone=phone)  # Returns a list of accounts
+            return app_tables.wallet_users_account.search(users_account_phone=phone)  # Returns a list of accounts
         except Exception as e:
             print(f"Error fetching accounts: {e}")
             return False
@@ -1139,7 +1154,7 @@ class DashBoardScreen(Screen):
         sm = self.manager
 
         # Get phone number from JsonStore
-        phone = JsonStore('user_data.json').get('user')['value']["phone"]
+        phone = JsonStore('user_data.json').get('user')['value']["users_phone"]
 
         # Check if account details exist
         account_details = self.account_details_exist(phone)
@@ -1155,8 +1170,40 @@ class DashBoardScreen(Screen):
             sm.current = 'withdraw'
         else:
             # If account details do not exist, show the add account dialog
-            self.show_add_account_dialog()
+            self.show_notification('Alert!',"No Bank accounts found, Would you like to add a bank account?")
 
+    def show_notification(self, title, message):
+    # Create content layout
+        content_layout = BoxLayout(orientation="vertical", padding="10dp",spacing = '5dp')
+
+        # Create title label with bold font
+        # title_label = MDLabel(text=text, font_size="20sp", bold=True, theme_text_color="Custom", text_color=(1, 1, 1, 1))
+
+        # Create message label
+        message_label = MDLabel(text=message, font_size=(150, None), halign="left", theme_text_color="Custom", text_color=(1, 1, 1, 1))
+        ok_button = Button(text='OK', size_hint=(None, None), size=('50dp', '30dp'),on_release = self.add_account_screen)
+        ok_button.bind(on_press=lambda *args: popup.dismiss())
+        # Add labels to content layout
+        anchor_layout = AnchorLayout(anchor_x='right')
+        anchor_layout.add_widget(ok_button)
+
+        # Add labels and button to content layout
+        # content_layout.add_widget(title_label)
+        content_layout.add_widget(message_label)
+        content_layout.add_widget(anchor_layout)
+
+        # Create and display the notification popup
+        popup = Popup(
+            title=title,  # Remove default title
+            content=content_layout,
+            size_hint=(None, None),
+            size=('250dp','250dp'),
+            auto_dismiss=True,  # Close on touch outside the card
+            background_color=(0.078, 0.557, 0.996, 1.0)
+        )
+        popup.open()
+        return
+    
     def nav_editprofile(self):
         self.manager.add_widget(Factory.EditUser(name='edituser'))
         self.manager.current = 'edituser'
@@ -1199,7 +1246,7 @@ class DashBoardScreen(Screen):
         sm = self.manager
 
         # Get phone number from JsonStore
-        phone = JsonStore('user_data.json').get('user')['value']["phone"]
+        phone = JsonStore('user_data.json').get('user')['value']["users_phone"]
 
         # Check if account details exist
         account_details = self.account_details_exist(phone)
@@ -1215,7 +1262,7 @@ class DashBoardScreen(Screen):
             sm.current = 'transfer'
         else:
             # If account details do not exist, show the add account dialog
-            self.show_add_account_dialog()
+            self.show_notification('Alert!','No Bank accounts found, Would you like to add a bank account?')
 
     def nav_self_transfer(self):
         # Create a modal view for the loading animation
@@ -1255,7 +1302,7 @@ class DashBoardScreen(Screen):
         sm = self.manager
 
         # Get phone number from JsonStore
-        phone = JsonStore('user_data.json').get('user')['value']["phone"]
+        phone = JsonStore('user_data.json').get('user')['value']["users_phone"]
 
         # Check if account details exist
         account_details = self.account_details_exist(phone)
@@ -1271,7 +1318,7 @@ class DashBoardScreen(Screen):
             sm.current = 'self_transfer'
         else:
             # If account details do not exist, show the add account dialog
-            self.show_add_account_dialog()
+            self.show_notification('Alert!','No Bank accounts found, Would you like to add a bank account?')
 
     def show_add_account_dialog(self):
         dialog = MDDialog(
@@ -1290,8 +1337,7 @@ class DashBoardScreen(Screen):
         )
         dialog.open()
 
-    def add_account_screen(self, dialog):
-        dialog.dismiss()
+    def add_account_screen(self,instance):
         new_screen = Factory.AddAccountScreen(name='addaccount')
         self.manager.add_widget(new_screen)
         self.manager.current = 'addaccount'
@@ -1365,23 +1411,23 @@ class DashBoardScreen(Screen):
         try:
             # Get the phone number from the JSON file
             store = JsonStore('user_data.json').get('user')['value']
-            phone = store['phone']
+            phone = store['users_phone']
             # Query the 'transactions' table to fetch the transaction history
-            transactions = list(app_tables.wallet_users_transaction.search(phone=phone))
+            transactions = list(app_tables.wallet_users_transaction.search(users_transaction_phone=phone))
             self.manager.add_widget(Factory.Transaction(name='transaction'))
             trans_screen = self.manager.get_screen('transaction')
             trans_screen.ids.transaction_list.clear_widgets()
 
             current_date = ""
 
-            for transaction in sorted(filter(lambda x: x['date'] is not None, transactions), key=lambda x: x['date'],
+            for transaction in sorted(filter(lambda x: x['users_transaction_date'] is not None, transactions), key=lambda x: x['users_transaction_date'],
                                     reverse=True):
-                transaction_datetime = transaction['date']
+                transaction_datetime = transaction['users_transaction_date']
                 transaction_date_str = transaction_datetime.strftime('%Y-%m-%d')
                 transaction_date = transaction_date_str.split(' ')[0]
-                transactions_text = f"{transaction['receiver_phone']}"
-                fund_text = f"{round(transaction['fund'], 2)}"
-                fund_currency = f"{transaction['currency']}"
+                transactions_text = f"{transaction['users_transaction_receiver_phone']}"
+                fund_text = f"{round(transaction['users_transaction_fund'], 2)}"
+                fund_currency = f"{transaction['users_transaction_currency']}"
                 lowered_currency = fund_currency.lower()
                 fund_currency1 = f"currency-{lowered_currency}"
                 print(fund_currency1)
@@ -1396,13 +1442,23 @@ class DashBoardScreen(Screen):
                 transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(36))
 
                 # Add transaction details
+                if transaction['users_transaction_type'] == 'Withdrawn' or transaction['users_transaction_type'] == 'Deposited':
+                    print('inside cond')
+                    uer = app_tables.wallet_users.get(users_phone = phone)
+                    transactions_text = uer['users_username']
+                if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Debit':
+                    user = app_tables.wallet_users.get(users_phone = transaction['users_transaction_receiver_phone'] )
+                    transactions_text = user['users_username']
                 transaction_item_widget = OneLineListItem(text=f"{transactions_text}", theme_text_color='Custom',
                                                         text_color=[0, 0, 0, 1], height=dp(25), divider=None)
                 transaction_container.add_widget(transaction_item_widget)
 
                 transaction_container.add_widget(Widget(size_hint_x=None, width=dp(20)))
 
-                if transaction['transaction_type'] == 'Credit':
+                if transaction['users_transaction_type'] == 'Credit':
+                    fund_color = [0, 0.5, 0, 1]
+                    sign = '+'
+                elif transaction['users_transaction_type'] == 'Deposited':
                     fund_color = [0, 0.5, 0, 1]
                     sign = '+'
                 else:
@@ -1458,7 +1514,7 @@ class DashBoardScreen(Screen):
     def menu_callback(self, instance_menu_item):
         print(f"Selected currency: {instance_menu_item}")
         store = JsonStore('user_data.json')
-        phone_no = store.get('user')['value']["phone"]
+        phone_no = store.get('user')['value']["users_phone"]
         total_balance = self.manager.get_total_balance(phone_no, instance_menu_item)
         # Convert the total balance to the selected currency
 

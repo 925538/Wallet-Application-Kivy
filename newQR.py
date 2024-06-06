@@ -178,7 +178,7 @@ class QRCodeScreen(Screen):
         return False
 
     def generate_qr_code(self):
-        phone = str(JsonStore('user_data.json').get('user')['value']["phone"])
+        phone = str(JsonStore('user_data.json').get('user')['value']["users_phone"])
         qr_code = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,

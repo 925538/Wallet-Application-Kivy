@@ -283,11 +283,11 @@ class AddMoneyScreen(Screen):
     def dropdown(self):
         try:
             store = JsonStore('user_data.json')
-            phone = store.get('user')['value']["phone"]
+            phone = store.get('user')['value']["users_phone"]
 
             # Call the server function to fetch account details and bank names
-            bank_names = app_tables.wallet_users_account.search(phone=phone)
-            bank_names_str = [str(row['bank_name']) for row in bank_names]
+            bank_names = app_tables.wallet_users_account.search(users_account_phone=phone)
+            bank_names_str = [str(row['users_account_bank_name']) for row in bank_names]
             print(bank_names_str)
             if bank_names_str:
                 # Create the menu list dynamically based on the fetched bank names
@@ -320,12 +320,12 @@ class AddMoneyScreen(Screen):
         self.account_number = None
         self.ids.bank_dropdown.text = text
         store = JsonStore('user_data.json')
-        phone = store.get('user')['value']["phone"]
+        phone = store.get('user')['value']["users_phone"]
 
         try:
             # Call the server function to fetch account details and update dropdown
-            matching_accounts = app_tables.wallet_users_account.search(phone=phone, bank_name=text)
-            account = [str(row['account_number']) for row in matching_accounts]
+            matching_accounts = app_tables.wallet_users_account.search(users_account_phone=phone, users_account_bank_name=text)
+            account = [str(row['users_account_number']) for row in matching_accounts]
             if matching_accounts:
                 # Fetch the account number from the first matching account
                 self.account_number = account[0]
@@ -371,36 +371,41 @@ class AddMoneyScreen(Screen):
             print("Error fetching exchange rates.")
             self.manager.show_notification('Alert!','An error occured. Please try again.')
         store = JsonStore('user_data.json')
-        phone = store.get('user')['value']["phone"]
-        balance_table = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency)
+        phone = store.get('user')['value']["users_phone"]
+        balance_table = app_tables.wallet_users_balance.get(users_balance_phone=phone, users_balance_currency_type=currency)
         # Check if the amount is within the specified range
         if 500 <= amount <= 100000:
             if balance_table is None:
                 app_tables.wallet_users_balance.add_row(
-                    currency_type=currency,
-                    balance=self.exchange_rate_value,
-                    phone=phone
+                    users_balance_currency_type=currency,
+                    users_balance=self.exchange_rate_value,
+                    users_balance_phone=phone
                 )
+                print(self.exchange_rate_value)
+                self.ids.balance_lbl.text = str(self.exchange_rate_value)
+                
             else:
-                if balance_table["balance"] is not None:
-                    new_e_money = self.exchange_rate_value + balance_table['balance']
-                    balance_table['balance'] = new_e_money
-                    balance_table.update()        
+                if balance_table["users_balance"] is not None:
+                    new_e_money = self.exchange_rate_value + balance_table['users_balance']
+                    balance_table['users_balance'] = new_e_money
+                    balance_table.update()  
+                          
                 else:
                     new_e_money = self.exchange_rate_value
-                    balance_table['balance'] = new_e_money
-                    balance_table.update()        
-            self.ids.balance_lbl.text = str(int(balance_table['balance']))
+                    balance_table['users_balance'] = new_e_money
+                    balance_table.update()
+                
+                self.ids.balance_lbl.text = str(int(balance_table['users_balance']))
 
             try:
                 app_tables.wallet_users_transaction.add_row(
-                    receiver_phone=float(self.account_number),
-                    phone=phone,
-                    fund=self.exchange_rate_value,
-                    date=date,
-                    transaction_type="Credit",
-                    transaction_status="Wallet-Topup",
-                    currency = currency
+                    users_transaction_receiver_phone=float(self.account_number),
+                    users_transaction_phone=phone,
+                    users_transaction_fund=self.exchange_rate_value,
+                    users_transaction_date=date,
+                    users_transaction_type="Deposited",
+                    users_transaction_status="Wallet-Topup",
+                    users_transaction_currency = currency
                 )
                 # Show a success toast
                 # toast("Money added successfully.")
@@ -480,7 +485,7 @@ class AddMoneyScreen(Screen):
     def menu_callback(self, instance_menu_item):
         print(f"Selected currency: {instance_menu_item}")
         store = JsonStore('user_data.json')
-        phone_no = store.get('user')['value']["phone"]
+        phone_no = store.get('user')['value']["users_phone"]
         total_balance = self.manager.get_total_balance(phone_no, instance_menu_item)
         # Convert the total balance to the selected currency
 
@@ -522,10 +527,10 @@ class AddMoneyScreen(Screen):
         # for icon_btn in self.options_button_icon_mapping:
         self.ids.balance.text=""
         store1 = JsonStore('user_data.json')
-        phone_no = store1.get('user')['value']["phone"]
-        user_data=app_tables.wallet_users.get(phone=phone_no)
+        phone_no = store1.get('user')['value']["users_phone"]
+        user_data=app_tables.wallet_users.get(users_phone=phone_no)
         # user_data=app_tables.wallet_users.get(phone=phone_no)
-        user_default_currency = user_data['defaultcurrency']
+        user_default_currency = user_data['users_defaultcurrency']
         if user_default_currency:
             self.ids.options_button.icon = self.options_button_icon_mapping[user_default_currency]       
             total_balance = self.manager.get_total_balance(phone_no, user_default_currency)
@@ -534,17 +539,17 @@ class AddMoneyScreen(Screen):
             self.ids.balance_lbl.text = f'{int(total_balance)}'
         
         #users data
-        users_default_account = user_data['default_account']
+        users_default_account = user_data['users_default_account']
         if users_default_account:
-            ban_name = app_tables.wallet_users_account.get(account_number=float(users_default_account))
+            ban_name = app_tables.wallet_users_account.get(users_account_number=float(users_default_account))
             if ban_name:
-                bank_name = ban_name['bank_name']
+                bank_name = ban_name['users_account_bank_name']
                 self.ids.bank_dropdown.text = bank_name
                 self.test(bank_name)
     def called(self,currency):
         store1 = JsonStore('user_data.json')
-        phone_no = store1.get('user')['value']["phone"]
-        user_data=app_tables.wallet_users.get(phone=phone_no)
+        phone_no = store1.get('user')['value']["users_phone"]
+        user_data=app_tables.wallet_users.get(users_phone=phone_no)
         total_balance = self.manager.get_total_balance(phone_no, currency)
         self.ids.options_button.icon = self.options_button_icon_mapping[currency]
         self.ids.options_button.disabled = True

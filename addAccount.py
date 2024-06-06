@@ -7,7 +7,7 @@ from kivymd.uix.screen import Screen
 from kivymd.uix.snackbar import Snackbar
 from kivy.base import EventLoop
 from anvil.tables import app_tables
-
+from kivy.factory import Factory
 KV = """
 <AddAccountScreen>
     BoxLayout:
@@ -102,6 +102,7 @@ Builder.load_string(KV)
 class AddAccountScreen(Screen):
     def go_back(self):
         existing_screen = self.manager.get_screen('addaccount')
+        self.manager.add_widget(Factory.AccmanageScreen(name='accmanage'))
         self.manager.current = 'accmanage'
         self.ids.account_holder_name.text=''
         self.ids.account_number.text=''
@@ -157,12 +158,12 @@ class AddAccountScreen(Screen):
             return
 
         # Retrieve phone number from user_data.json
-        phone = JsonStore('user_data.json').get('user')['value']["phone"]
+        phone = JsonStore('user_data.json').get('user')['value']["users_phone"]
         try:
             accounts_table = app_tables.wallet_users_account
 
             # Check if the account already exists
-            existing_account = accounts_table.get(account_number=float(account_number))
+            existing_account = accounts_table.get(users_account_number=float(account_number))
             if existing_account:
                 print("Error: Account number already exists.")
                 # Snackbar(text="Error: Account number already exists.").open()
@@ -171,14 +172,14 @@ class AddAccountScreen(Screen):
 
             # Add a new row to the 'accounts' subcollection
             new_account = accounts_table.add_row(
-                account_holder_name=account_holder_name,
-                account_number=float(account_number),
-                bank_name=bank_name,
-                branch_name=branch_name,
-                ifsc_code=ifsc_code,
-                account_type=account_type,
-                status_confirm=True,
-                phone=phone
+                users_account_holder_name=account_holder_name,
+                users_account_number=float(account_number),
+                users_account_bank_name=bank_name,
+                users_account_branch_name=branch_name,
+                users_account_ifsc_code=ifsc_code,
+                users_account_type=account_type,
+                users_account_status_confirm=True,
+                users_account_phone=phone
             )
 
             print("Account details added successfully.")

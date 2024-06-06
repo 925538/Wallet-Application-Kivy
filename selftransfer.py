@@ -160,16 +160,16 @@ class PayScreen(MDScreen):
         if amount:
             if self.sender_account and self.receiver_account:
                 try:
-                    sender_account = app_tables.wallet_users_account.get(bank_name=self.sender_account)
-                    receiver_account = app_tables.wallet_users_account.get(bank_name=self.receiver_account)
+                    sender_account = app_tables.wallet_users_account.get(users_account_bank_name=self.sender_account)
+                    receiver_account = app_tables.wallet_users_account.get(users_account_bank_name=self.receiver_account)
 
                     app_tables.wallet_users_transaction.add_row(
-                        date=datetime.now(),
-                        fund=float(amount),
-                        transaction_type='credit',
-                        transaction_status='self_transfer',
-                        receiver_phone=receiver_account['phone'],
-                        phone=sender_account['phone']
+                        users_transaction_date=datetime.now(),
+                        users_transaction_fund=float(amount),
+                        users_transaction_type='Credit',
+                        users_transaction_status='self_transfer',
+                        users_transaction_receiver_phone=receiver_account['users_account_phone'],
+                        users_transaction_phone=sender_account['users_account_phone']
                     )
                     print(f"Payment successful: {amount}")
                     # Navigate to the dashboard screen after successful payment
@@ -204,10 +204,10 @@ class SelftransferScreen(Screen):
     def fetch_bank_names(self, sender=True):
         try:
             store = JsonStore('user_data.json')
-            phone = store.get('user')['value']["phone"]
+            phone = store.get('user')['value']["users_phone"]
 
-            bank_names = app_tables.wallet_users_account.search(phone=phone)
-            bank_names_str = [str(row['bank_name']) for row in bank_names]
+            bank_names = app_tables.wallet_users_account.search(users_account_phone=phone)
+            bank_names_str = [str(row['users_account_bank_name']) for row in bank_names]
 
             if bank_names_str:
                 if len(bank_names_str) == 1:

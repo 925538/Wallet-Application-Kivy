@@ -121,7 +121,7 @@ class DefaultCurrency(Screen):
 
     def pressed(self, money):
         currency_options = ['INR', 'USD', 'EUR', 'GBP']
-        store = JsonStore("user_data.json").get('user')['value']['defaultcurrency']
+        store = JsonStore("user_data.json").get('user')['value']['users_defaultcurrency']
 
         for icon_opt in currency_options:
             if icon_opt == money:
@@ -155,13 +155,13 @@ class DefaultCurrency(Screen):
 
                 store = JsonStore("user_data.json")
                 user = store.get('user')
-                phone = user['value']['phone']
-                user['value']['defaultcurrency'] = money
+                phone = user['value']['users_phone']
+                user['value']['users_defaultcurrency'] = money
                 store.put("user", **user)  # updating the default currency
                 # store.save()
 
-                users_curr = app_tables.wallet_users.get(phone=phone)
-                users_curr.update(defaultcurrency=money)
+                users_curr = app_tables.wallet_users.get(users_phone=phone)
+                users_curr.update(users_defaultcurrency=money)
                 # users_curr.commit()
 
             else:
@@ -170,12 +170,12 @@ class DefaultCurrency(Screen):
     def on_enter(self):
         # store=JsonStore("user_data.json").get('user')['value']['defaultcurrency']
         # defaultcurrency=store,
-        phone = JsonStore("user_data.json").get('user')['value']['phone']
+        phone = JsonStore("user_data.json").get('user')['value']['users_phone']
         # print(store)
-        user = app_tables.wallet_users.get(phone=phone)
-        users_default_currency = user['defaultcurrency']
+        user = app_tables.wallet_users.get(users_phone=phone)
+        users_default_currency = user['users_defaultcurrency']
 
-        print(user['defaultcurrency'])
+        print(user['users_defaultcurrency'])
         # checking if there is default currency for this user
         if users_default_currency != None:
             self.ids[users_default_currency].md_bg_color = "#148EFE"

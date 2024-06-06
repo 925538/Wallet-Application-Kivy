@@ -43,7 +43,7 @@ class ScreenManagement(ScreenManager):
             requests.get("http://www.google.com", timeout=5)
 
             # If there is an internet connection, connect to Anvil server
-            client = anvil.server.connect("server_7JA6PVL5DBX5GSBY357V7WVW-TLZI2SSXOVZCVYDM")# server_HCPXSEPK7H5QFVBH5DD4CAWG-CQAJC3TXYQYKC5WX
+            client = anvil.server.connect("server_7JA6PVL5DBX5GSBY357V7WVW-TLZI2SSXOVZCVYDM")#server_7TVGKWXGEIZZ6HAX2K2HIR4X-KSG4FOJXTQGKTVPM   
 
             # Schedule the login status check after 5 seconds
             Clock.schedule_once(self.check_login_status, 5)
@@ -60,13 +60,13 @@ class ScreenManagement(ScreenManager):
             store = JsonStore('user_data.json')
             self.remove_widget(self.get_screen('loading'))
             if 'user' in store:
-                phone = JsonStore('user_data.json').get('user')['value']['phone']
+                phone = JsonStore('user_data.json').get('user')['value']['users_phone']
                 print('yes')
                 self.add_widget(Factory.DashBoardScreen(name='dashboard'))
                 self.current = "dashboard"
-                users = app_tables.wallet_users.get(phone = phone)
+                users = app_tables.wallet_users.get(users_phone = phone)
                 try:
-                    if users['profile_pic'] is not None:
+                    if users['users_profile_pic'] is not None:
                         self.current_screen.user_pic()
                 except Exception as e:
                     print(e)
@@ -125,7 +125,7 @@ class ScreenManagement(ScreenManager):
 
     def get_username(self):
         store = JsonStore('user_data.json')
-        return store.get('user')['value']["username"]
+        return store.get('user')['value']["users_username"]
 
     def nav_navbar(self):
         self.current = 'navbar'
@@ -154,9 +154,9 @@ class ScreenManagement(ScreenManager):
 
     def get_total_balance(self, phone, currency_type):
         try:
-            acc_row = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency_type)
+            acc_row = app_tables.wallet_users_balance.get(users_balance_phone=phone, users_balance_currency_type=currency_type)
             if acc_row:
-                return acc_row['balance']
+                return acc_row['users_balance']
             else:
                 return 0
         except Exception as e:

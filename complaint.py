@@ -140,7 +140,7 @@ class ComplaintScreen(Screen):
         store = JsonStore('user_data.json').get('user')['value']
         # Update labels in ComplaintScreen
         complaint_screen = self.get_screen('complaint')
-        complaint_screen.ids.email_label.text = store["gmail"]
+        complaint_screen.ids.email_label.text = store["users_email"]
 
     def Submit(self):
         # self.show_popup("Your Report has been submited. \nOur Technical Executive will respond you shortly.")
