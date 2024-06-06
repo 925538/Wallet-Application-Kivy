@@ -241,28 +241,28 @@ class SignInScreen(Screen):
         else:
             try:
                 if re.match(r'^\d{10}$', input_text):  # Phone number with 10 digits
-                    self.user = app_tables.wallet_users.get(phone=float(input_text), password=password)
+                    self.user = app_tables.wallet_users.get(users_phone=float(input_text), users_password=password)
                 elif re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', input_text):  # Email
-                    self.user = app_tables.wallet_users.get(email=input_text, password=password)
+                    self.user = app_tables.wallet_users.get(users_email=input_text, users_password=password)
                 else:
-                    toast("invalid phone or email")
+                    self.manager.show_notification('Alert!','Invalid Email or Password.')
                     # self.manager.show_notification('Alert!','Invalid phone or email.')
 
                 # Check if the user was found
                 if self.user is None:
                     # Show popup for invalid user
-                    self.show_popup("Invalid User")
+                    self.manager.show_notification('Alert!','Invalid User.')
                     # self.manager.show_notification('Alert!','Invalid User.')
                 else:
                     # Now 'user' contains the Anvil row
-                    self.user.update(last_login=date)
+                    self.user.update(users_last_login=date)
                     user_data = dict(self.user)
-                    user_data['profile_pic'] = None
-                    user_data['last_login'] = str(user_data['last_login'])
-                    self.user.update(last_login=date)
+                    user_data['users_profile_pic'] = None
+                    user_data['users_last_login'] = str(user_data['users_last_login'])
+                    self.user.update(users_last_login=date)
                     print(user_data)
 
-                    if user_data['banned']:  # Check if user is banned
+                    if user_data['users_banned']:  # Check if user is banned
                         print("User is banned. Showing popup.")
                         # Show popup for banned user
                         self.show_popup(
@@ -280,7 +280,7 @@ class SignInScreen(Screen):
                         self.manager.add_widget(Factory.DashBoardScreen(name='dashboard'))
                         dashboard = self.manager.get_screen('dashboard')
                         try:
-                            image_stored = self.user['profile_pic']
+                            image_stored = self.user['users_profile_pic']
                             if image_stored :
                                 print('yes in users')
                                 decoded_image_bytes =image_stored.get_bytes()
@@ -299,19 +299,19 @@ class SignInScreen(Screen):
                             conn = sqlite3.connect('wallet_database.db')
                             cursor = conn.cursor()
                             user = JsonStore('user_data.json').get('user')['value']
-                            phone = user['phone']
-                            username = user['username']
-                            email = user['email']
-                            password = user['password']
-                            confirm_email = user['confirm_email']
-                            aadhar_number = user['aadhar']
-                            pan = user['pan']
-                            address = user['address']
-                            usertype = user['usertype']
-                            banned = user['banned']
-                            balance_limit = user['limit']
-                            daily_limit = user['daily_limit']
-                            last_login = user['last_login']
+                            phone = user['users_phone']
+                            username = user['users_username']
+                            email = user['users_email']
+                            password = user['users_password']
+                            confirm_email = user['users_confirm_email']
+                            aadhar_number = user['users_aadhar']
+                            pan = user['users_pan']
+                            address = user['users_address']
+                            usertype = user['users_usertype']
+                            banned = user['users_banned']
+                            balance_limit = user['users_user_limit']
+                            daily_limit = user['users_daily_limit']
+                            last_login = user['users_last_login']
 
                             # Insert into wallet_users table
                             cursor.execute('''

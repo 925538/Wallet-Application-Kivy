@@ -209,8 +209,8 @@ class AddPhoneScreen(Screen):
     def fetch_and_update_addPhone(self):
         store = JsonStore('user_data.json').get('user')['value']
         addPhone_screen = self.get_screen('addphone')
-        addPhone_screen.ids.contact_label.text = store["phone"]
-        addPhone_screen.current_user_phone = str(store["phone"])
+        addPhone_screen.ids.contact_label.text = store["users_phone"]
+        addPhone_screen.current_user_phone = str(store["users_phone"])
 
     def on_top_app_bar_title(self, instance, value):
         app = MDApp.get_running_app()
@@ -222,8 +222,8 @@ class AddPhoneScreen(Screen):
     def on_search_text_entered(self):
         number = float(self.ids.search_text_card.text)
         try:
-            userdata = app_tables.wallet_users.get(phone=number)
-            username = userdata['username']
+            userdata = app_tables.wallet_users.get(users_phone=number)
+            username = userdata['users_username']
             print(f'username in SearchField:{username}')
             self.ids.search_result_item.disabled = False
             self.ids.search_result_item.text = username
@@ -247,14 +247,14 @@ class AddPhoneScreen(Screen):
             print(self.current_user_phone)
 
             # Fetch the user details from the database
-            user_data = app_tables.wallet_users.get(phone=number)
+            user_data = app_tables.wallet_users.get(users_phone=number)
 
             if user_data:
                 user_details_screen.current_user_phone = self.current_user_phone
                 print(self.current_user_phone)
                 user_details_screen.searched_user_phone = str(
-                    user_data['phone'])  # Adjust this based on your data structure
-                print(f"{user_data['phone']}")
+                    user_data['users_phone'])  # Adjust this based on your data structure
+                print(f"{user_data['users_phone']}")
             else:
                 print(f"User with phone number {number} not found in the database")
                 self.manager.show_notification('Alert!','User not found.')
@@ -297,7 +297,7 @@ class UserDetailsScreen(Screen):
     def on_enter(self, sender=None):
         # Convert phone numbers to integers
         global message, color, align
-        current_user_phone1 = JsonStore('user_data.json').get('user')['value']['phone']
+        current_user_phone1 = JsonStore('user_data.json').get('user')['value']['users_phone']
         self.current_user_phone = current_user_phone1
         print(f'current_user_phone:{self.current_user_phone}')
         searched_user_phone = int(self.searched_user_phone)
@@ -305,14 +305,14 @@ class UserDetailsScreen(Screen):
 
         # Get the transaction data between current and searched users
         user_data_1 = app_tables.wallet_users_transaction.search(
-            phone=searched_user_phone,
-            receiver_phone=current_user_phone1,
-            transaction_type='Debit'
+            users_transaction_phone=searched_user_phone,
+            users_transaction_receiver_phone=current_user_phone1,
+            users_transaction_type='Debit'
         )
         user_data_2 = app_tables.wallet_users_transaction.search(
-            phone=current_user_phone1,
-            receiver_phone=searched_user_phone,
-            transaction_type='Debit'
+            users_transaction_phone=current_user_phone1,
+            users_transaction_receiver_phone=searched_user_phone,
+            users_transaction_type='Debit'
         )
 
         # Convert LiveObjectProxy results to lists
@@ -321,16 +321,16 @@ class UserDetailsScreen(Screen):
 
         user_data = user_data_1_list + user_data_2_list
 
-        user_data.sort(key=lambda x: x['date'])
+        user_data.sort(key=lambda x: x['users_transaction_date'])
 
         self.ids.transaction_list_mdlist.clear_widgets()
 
         # Iterate over the transaction data and display
         for transaction in user_data:
-            sender = transaction['phone']
-            receiver = transaction['receiver_phone']
-            fund = transaction['fund']
-            date = transaction['date']
+            sender = transaction['users_transaction_phone']
+            receiver = transaction['users_transaction_receiver_phone']
+            fund = transaction['users_transaction_fund']
+            date = transaction['users_transaction_date']
 
             # Check if date is not None before formatting
             if date is not None:
@@ -340,8 +340,8 @@ class UserDetailsScreen(Screen):
                 date_str = "Unknown Date"
                 date_only = "Unknown Date"
 
-            searched_user_data = app_tables.wallet_users.get(phone=searched_user_phone)
-            searched_username = searched_user_data['username'] if searched_user_data else 'Unknown User'
+            searched_user_data = app_tables.wallet_users.get(users_phone=searched_user_phone)
+            searched_username = searched_user_data['users_username'] if searched_user_data else 'Unknown User'
 
             date_label = Label(
                 text=date_str,
@@ -453,50 +453,50 @@ class UserDetailsScreen(Screen):
 
         # Fetch current user's data from wallet_users_balance
         current_user_data = app_tables.wallet_users_balance.search(
-            phone=int(self.current_user_phone),
-            currency_type='INR'  # Add currency_type condition
+            users_balance_phone=int(self.current_user_phone),
+            users_balance_currency_type='INR'  # Add currency_type condition
         )
         if len(current_user_data) == 1:
             current_user_data = current_user_data[0]
-            existing_bal = current_user_data['balance']
+            existing_bal = current_user_data['users_balance']
             if amount > existing_bal:
                 # toast("Insufficient Balance.")
                 self.manager.show_notification('Alert!','Insufficient Balance.')
             else:
                 # Deduct amount from current user's balance
-                current_user_data['balance'] -= amount
+                current_user_data['users_balance'] -= amount
                 current_user_data.update()
                 print(f'{amount} deduced from {int(self.current_user_phone)}')
 
                 app_tables.wallet_users_transaction.add_row(
-                    receiver_phone=int(self.searched_user_phone),
-                    phone=int(self.current_user_phone),
-                    fund=amount,
-                    date=date,
-                    transaction_type="Debit",
-                    currency = 'INR'
+                    users_transaction_receiver_phone=int(self.searched_user_phone),
+                    users_transaction_phone=int(self.current_user_phone),
+                    users_transaction_fund=amount,
+                    users_transaction_date=date,
+                    users_transaction_type="Debit",
+                    users_transaction_currency = 'INR'
                 )
 
                 # Fetch searched user's data from wallet_users_balance
                 searched_user_data = app_tables.wallet_users_balance.search(
-                    phone=int(self.searched_user_phone),
-                    currency_type='INR'  # Add currency_type condition
+                    users_balance_phone=int(self.searched_user_phone),
+                    users_balance_currency_type='INR'  # Add currency_type condition
                 )
                 if len(searched_user_data) == 1:
                     searched_user_data = searched_user_data[0]
                     # Add amount to searched user's balance
 
-                    searched_user_data['balance'] += amount
+                    searched_user_data['users_balance'] += amount
                     searched_user_data.update()
                     print(f'{amount} added to {int(self.searched_user_phone)}')
 
                     app_tables.wallet_users_transaction.add_row(
-                        receiver_phone=int(self.current_user_phone),
-                        phone=int(self.searched_user_phone),
-                        fund=amount,
-                        date=date,
-                        transaction_type="Credit",
-                        currency='INR'
+                        users_transaction_receiver_phone=int(self.current_user_phone),
+                        users_transaction_phone=int(self.searched_user_phone),
+                        users_transaction_fund=amount,
+                        users_transaction_date=date,
+                        users_transaction_type="Credit",
+                        users_transaction_currency='INR'
                     )
                     Clock.schedule_once(lambda dt: self.clear_text_field(), 0.1)
 

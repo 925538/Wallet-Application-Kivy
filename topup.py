@@ -86,11 +86,11 @@ class Topup(Screen):
     def dropdown(self):
         try:
             store = JsonStore('user_data.json')
-            phone = store.get('user')['value']["phone"]
+            phone = store.get('user')['value']["users_phone"]
 
             # Call the server function to fetch account details and bank names
-            bank_names = app_tables.wallet_users_account.search(phone=phone)
-            bank_names_str = [str(row['bank_name']) for row in bank_names]
+            bank_names = app_tables.wallet_users_account.search(users_account_phone=phone)
+            bank_names_str = [str(row['users_account_bank_name']) for row in bank_names]
             print(bank_names_str)
             if bank_names_str:
                 # Create the menu list dynamically based on the fetched bank names
@@ -123,12 +123,12 @@ class Topup(Screen):
         self.account_number = None
         self.ids.bank_dropdown.text = text
         store = JsonStore('user_data.json')
-        phone = store.get('user')['value']["phone"]
+        phone = store.get('user')['value']["users_phone"]
 
         try:
             # Call the server function to fetch account details and update dropdown
-            matching_accounts = app_tables.wallet_users_account.search(phone=phone, bank_name=text)
-            account = [str(row['account_number']) for row in matching_accounts]
+            matching_accounts = app_tables.wallet_users_account.search(users_account_phone=phone, users_account_bank_name=text)
+            account = [str(row['users_account_number']) for row in matching_accounts]
             if matching_accounts:
                 # Fetch the account number from the first matching account
                 self.account_number = account[0]
@@ -160,34 +160,34 @@ class Topup(Screen):
             print("Error fetching exchange rates.")
             self.manager.show_notification('Alert!','An error occured. Please try again.')
         store = JsonStore('user_data.json')
-        phone = store.get('user')['value']["phone"]
-        balance_table = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency)
+        phone = store.get('user')['value']["users_phone"]
+        balance_table = app_tables.wallet_users_balance.get(users_balance_phone=phone, users_balance_currency_type=currency)
         print(balance_table)
         # Check if the amount is within the specified range
         if 500 <= amount <= 100000:
             if balance_table is None:
                 app_tables.wallet_users_balance.add_row(
-                    currency_type=currency,
-                    balance=self.exchange_rate_value,
-                    phone=phone
+                    users_balance_currency_type=currency,
+                    users_balance=self.exchange_rate_value,
+                    users_balance_phone=phone
                 )
             else:
-                if balance_table["balance"] is not None:
-                    new_e_money = self.exchange_rate_value + balance_table['balance']
-                    balance_table['balance'] = new_e_money
+                if balance_table["users_balance"] is not None:
+                    new_e_money = self.exchange_rate_value + balance_table['users_balance']
+                    balance_table['users_balance'] = new_e_money
                     balance_table.update()
                 else:
                     new_e_money = self.exchange_rate_value
-                    balance_table['balance'] = new_e_money
+                    balance_table['users_balance'] = new_e_money
                     balance_table.update()
             try:
                 app_tables.wallet_users_transaction.add_row(
-                    receiver_phone=float(self.account_number),
-                    phone=phone,
-                    fund=self.exchange_rate_value,
-                    date=date,
-                    transaction_type="credit",
-                    currency = currency
+                    users_transaction_receiver_phone=float(self.account_number),
+                    users_transaction_phone=phone,
+                    users_transaction_fund=self.exchange_rate_value,
+                    users_transaction_date=date,
+                    users_transaction_type="Credit",
+                    users_transaction_currency = currency
                 )
                 # Show a success toast
                 # toast("Money added successfully.")

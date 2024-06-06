@@ -203,9 +203,9 @@ class TransferScreen(Screen):
         currency = self.ids.currency_spinner.text
 
         store = JsonStore('user_data.json')
-        senders_phone = store.get('user')['value']["phone"]
+        senders_phone = store.get('user')['value']["users_phone"]
         date = datetime.now()
-        sender = app_tables.wallet_users_balance.get(phone=senders_phone, currency_type=currency)
+        sender = app_tables.wallet_users_balance.get(users_balance_phone=senders_phone, users_balance_currency_type=currency)
         # check reciever is exist or not
         rec_exist = self.check_reg(receiver_phone)
         if rec_exist is None:
@@ -213,41 +213,41 @@ class TransferScreen(Screen):
             self.manager.show_notification("Alert!","User not registered. Consider inviting the user to join.")
 
             return
-        reciever = app_tables.wallet_users_balance.get(phone=receiver_phone, currency_type=currency)
+        reciever = app_tables.wallet_users_balance.get(users_balance_phone=receiver_phone, users_balance_currency_type=currency)
         try:
             if sender is not None:
-                s_old_balance = sender['balance']
+                s_old_balance = sender['users_balance']
                 if amount <= s_old_balance:
                     new_balance = s_old_balance - amount
-                    sender['balance'] = new_balance
+                    sender['users_balance'] = new_balance
                     if reciever is None:
                         app_tables.wallet_users_balance.add_row(
-                            phone=receiver_phone,
-                            currency_type=currency,
-                            balance=amount
+                            users_balance_phone=receiver_phone,
+                            users_balance_currency_type=currency,
+                            users_balance=amount
                         )
                     else:
-                        r_old_balance = reciever['balance']
+                        r_old_balance = reciever['users_balance']
                         r_new_balance = r_old_balance + amount
-                        reciever['balance'] = r_new_balance
+                        reciever['users_balance'] = r_new_balance
                         reciever.update()
                         app_tables.wallet_users_transaction.add_row(
-                                    receiver_phone=receiver_phone,
-                                    phone=senders_phone,
-                                    fund=amount,
-                                    date=date,
-                                    transaction_status="success",
-                                    transaction_type="Debit",
-                                    currency = currency
+                                    users_transaction_receiver_phone=receiver_phone,
+                                    users_transaction_phone=senders_phone,
+                                    users_transaction_fund=amount,
+                                    users_transaction_date=date,
+                                    users_transaction_status="success",
+                                    users_transaction_type="Debit",
+                                    users_transaction_currency = currency
                                 )
                         app_tables.wallet_users_transaction.add_row(
-                            receiver_phone=senders_phone,
-                            phone=receiver_phone,
-                            fund=amount,
-                            date=date,
-                            transaction_type="Credit",
-                            transaction_status="success",
-                            currency = currency
+                            users_transaction_receiver_phone=senders_phone,
+                            users_transaction_phone=receiver_phone,
+                            users_transaction_fund=amount,
+                            users_transaction_date=date,
+                            users_transaction_type="Credit",
+                            users_transaction_status="success",
+                            users_transaction_currency = currency
                         )
                         self.manager.show_notification('Success', "Money transferred successfully.")
                         # toast("Money added successfully.")
@@ -300,7 +300,7 @@ class TransferScreen(Screen):
     #     self.ids.test_money.active = False
 
     def check_reg(self, phone):
-        return app_tables.wallet_users.get(phone=phone)
+        return app_tables.wallet_users.get(users_phone=phone)
 
     def show_currency_menu(self):
         currencies = ['INR', 'USD', 'EUR', 'GBP']

@@ -95,11 +95,11 @@ class ResetPassword(Screen):
 
     def submit_password(self):
         # Get the current user's phone number from the stored user data
-        phone = JsonStore("user_data.json").get("user")["value"]['phone']
-        current_user_password = JsonStore("user_data.json").get("user")["value"]["password"]
+        phone = JsonStore("user_data.json").get("user")["value"]['users_phone']
+        current_user_password = JsonStore("user_data.json").get("user")["value"]["users_password"]
 
         # Get the user from the Anvil app_tables.wallet_users
-        user = app_tables.wallet_users.get(phone = phone,password=current_user_password)
+        user = app_tables.wallet_users.get(users_phone = phone,users_password=current_user_password)
         try:
             if user:
                 # Get the decrypted password from the user's data
@@ -109,7 +109,7 @@ class ResetPassword(Screen):
                 if current_user_password == self.ids.old_password_input.text:
                     # Previous password is correct, update with the new password
                     # new_encrypted_password = anvil.server.call("save_secret_data", self.ids.new_password_input.text)
-                    user.update(password=self.ids.new_password_input.text)
+                    user.update(users_password=self.ids.new_password_input.text)
 
                     # Show a success pop-up
                     # dialog = MDDialog(

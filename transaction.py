@@ -249,7 +249,7 @@ class Transaction(Screen):
 
     def get_transaction_history(self):
         store = JsonStore('user_data.json').get('user')['value']
-        phone = store['phone']
+        phone = store['users_phone']
         if self.filter_dialog:
             self.filter_dialog.dismiss()
         # if self.type_filt:
@@ -257,14 +257,14 @@ class Transaction(Screen):
         
         
         
-        filters = {'phone':phone,}
+        filters = {'users_transaction_phone':phone,}
         
         # transaction = []
         if self.currency:
-            filters['currency']=self.currency
+            filters['users_transaction_currency']=self.currency
             # transaction = list(app_tables.wallet_users_transaction.search(phone=phone,currency = currency ))
         if self.type_filt_credit:
-            filters['transaction_type']=self.type_filt_credit
+            filters['users_transaction_type']=self.type_filt_credit
             # transaction = list(app_tables.wallet_users_transaction.search(phone=phone,transaction_type = transaction_type ))
         # if 'no_filter' in arguements.keys():
         #     print('yes no filter')
@@ -272,9 +272,9 @@ class Transaction(Screen):
         #     for i in transaction:
         #         print(i['receiver_phone'])
         if self.type_filt_debit:
-            filters['transaction_type']=self.type_filt_debit
+            filters['users_transaction_type']=self.type_filt_debit
         if self.type_filt_credit and self.type_filt_debit:
-            del filters['transaction_type']
+            del filters['users_transaction_type']
             print(filters.items())
                     
         # if self.currency == None or self.type_filt1 ==None:
@@ -286,17 +286,17 @@ class Transaction(Screen):
             self.ids.transaction_list.clear_widgets()
             current_date = ""
 
-            for transaction in sorted(filter(lambda x: x['date'] is not None, transactions), key=lambda x: x['date'],
+            for transaction in sorted(filter(lambda x: x['users_transaction_date'] is not None, transactions), key=lambda x: x['users_transaction_date'],
                                     reverse=True):
-                transaction_datetime = transaction['date']
+                transaction_datetime = transaction['users_transaction_date']
                 transaction_date_str = transaction_datetime.strftime('%Y-%m-%d')
                 transaction_date = transaction_date_str.split(' ')[0]
-                transactions_text = f"{transaction['receiver_phone']}"
-                fund_text = f"{round(transaction['fund'], 2)}"
-                fund_currency = f"{transaction['currency']}"
+                transactions_text = f"{transaction['users_transaction_receiver_phone']}"
+                fund_text = f"{round(transaction['users_transaction_fund'], 2)}"
+                fund_currency = f"{transaction['users_transaction_currency']}"
                 lowered_currency = fund_currency.lower()
                 fund_currency1 = f"currency-{lowered_currency}"
-                
+                # if transaction['']
                 if transaction_date != current_date :
                     
                     current_date = transaction_date
@@ -309,14 +309,23 @@ class Transaction(Screen):
                 transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(36))
 
                 # Add transaction details
-                
+                if transaction['users_transaction_type'] == 'Withdrawn' or transaction['users_transaction_type'] == 'Deposited':
+                    print('inside cond')
+                    uer = app_tables.wallet_users.get(users_phone = phone)
+                    transactions_text = uer['users_username']
+                if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Debit':
+                    user = app_tables.wallet_users.get(users_phone = transaction['users_transaction_receiver_phone'] )
+                    transactions_text = user['users_username']
                 transaction_item_widget = OneLineListItem(text=f"{transactions_text}", theme_text_color='Custom',
                                                         text_color=[0, 0, 0, 1], divider=None)
                 transaction_container.add_widget(transaction_item_widget)
 
                 transaction_container.add_widget(Widget(size_hint_x=None, width=dp(20)))
 
-                if transaction['transaction_type'] == 'Credit':
+                if transaction['users_transaction_type'] == 'Credit':
+                    fund_color = [0, 0.5, 0, 1]
+                    sign = '+'
+                elif transaction['users_transaction_type'] == 'Deposited':
                     fund_color = [0, 0.5, 0, 1]
                     sign = '+'
                 else:
@@ -351,14 +360,14 @@ class Transaction(Screen):
                     list1 = OneLineListItem(text=header_text, height=dp(15), theme_text_color='Custom',
                                                     text_color=[0, 0, 0, 1], divider=None, bg_color="#e5f3ff", )
                     self.ids.transaction_list.add_widget(list1)
-                    for transaction in sorted(filter(lambda x: x['date'] is not None , transactions), key=lambda x: x['date'],
+                    for transaction in sorted(filter(lambda x: x['users_transaction_date'] is not None , transactions), key=lambda x: x['users_transaction_date'],
                                             reverse=True):
-                        transaction_datetime = transaction['date']
+                        transaction_datetime = transaction['users_transaction_date']
                         transaction_date_str = transaction_datetime.strftime('%Y-%m-%d')
                         transaction_date = transaction_date_str.split(' ')[0]
-                        transactions_text = f"{transaction['receiver_phone']}"
-                        fund_text = f"{round(transaction['fund'], 2)}"
-                        fund_currency = f"{transaction['currency']}"
+                        transactions_text = f"{transaction['users_transaction_receiver_phone']}"
+                        fund_text = f"{round(transaction['users_transaction_fund'], 2)}"
+                        fund_currency = f"{transaction['users_transaction_currency']}"
                         lowered_currency = fund_currency.lower()
                         fund_currency1 = f"currency-{lowered_currency}"
                         print(fund_text,transaction_date_str)
@@ -369,6 +378,13 @@ class Transaction(Screen):
                         transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(36))
 
                         # Add transaction details
+                        if transaction['users_transaction_type'] == 'Withdrawn' or transaction['users_transaction_type'] == 'Deposited':
+                            print('inside cond')
+                            uer = app_tables.wallet_users.get(users_phone = phone)
+                            transactions_text = uer['users_username']
+                        if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Debit':
+                            user = app_tables.wallet_users.get(users_phone = transaction['users_transaction_receiver_phone'] )
+                            transactions_text = user['users_username']
                         if transaction_date_str == str(self.start_date):
                             print('yes inside')
                             transaction_item_widget = OneLineListItem(text=f"{transactions_text}", theme_text_color='Custom',
@@ -377,7 +393,10 @@ class Transaction(Screen):
 
                             transaction_container.add_widget(Widget(size_hint_x=None, width=dp(20)))
 
-                            if transaction['transaction_type'] == 'Credit':
+                            if transaction['users_transaction_type'] == 'Credit':
+                                fund_color = [0, 0.5, 0, 1]
+                                sign = '+'
+                            elif transaction['users_transaction_type'] == 'Deposited':
                                 fund_color = [0, 0.5, 0, 1]
                                 sign = '+'
                             else:
@@ -401,14 +420,14 @@ class Transaction(Screen):
                     self.ids.transaction_list.clear_widgets()
                     current_date = ""
 
-                    for transaction in sorted(filter(lambda x: x['date'] is not None, transactions), key=lambda x: x['date'],
+                    for transaction in sorted(filter(lambda x: x['users_transaction_date'] is not None, transactions), key=lambda x: x['users_transaction_date'],
                                             reverse=True):
-                        transaction_datetime = transaction['date']
+                        transaction_datetime = transaction['users_transaction_date']
                         transaction_date_str = transaction_datetime.strftime('%Y-%m-%d')
                         transaction_date = transaction_date_str.split(' ')[0]
-                        transactions_text = f"{transaction['receiver_phone']}"
-                        fund_text = f"{round(transaction['fund'], 2)}"
-                        fund_currency = f"{transaction['currency']}"
+                        transactions_text = f"{transaction['users_transaction_receiver_phone']}"
+                        fund_text = f"{round(transaction['users_transaction_fund'], 2)}"
+                        fund_currency = f"{transaction['users_transaction_currency']}"
                         lowered_currency = fund_currency.lower()
                         fund_currency1 = f"currency-{lowered_currency}"
 
@@ -424,6 +443,13 @@ class Transaction(Screen):
                             transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(36))
 
                             # Add transaction details
+                            if transaction['users_transaction_type'] == 'Withdrawn' or transaction['users_transaction_type'] == 'Deposited':
+                                print('inside cond')
+                                uer = app_tables.wallet_users.get(users_phone = phone)
+                                transactions_text = uer['users_username']
+                            if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Debit':
+                                user = app_tables.wallet_users.get(users_phone = transaction['users_transaction_receiver_phone'] )
+                                transactions_text = user['users_username']
                             if str(self.start_date) <= transaction_date_str <= str(self.end_date):
                                 transaction_item_widget = OneLineListItem(text=f"{transactions_text}", theme_text_color='Custom',
                                                                         text_color=[0, 0, 0, 1], divider=None)
@@ -431,7 +457,10 @@ class Transaction(Screen):
 
                                 transaction_container.add_widget(Widget(size_hint_x=None, width=dp(20)))
 
-                                if transaction['transaction_type'] == 'Credit':
+                                if transaction['users_transaction_type'] == 'Credit':
+                                    fund_color = [0, 0.5, 0, 1]
+                                    sign = '+'
+                                elif transaction['users_transaction_type'] == 'Deposited':
                                     fund_color = [0, 0.5, 0, 1]
                                     sign = '+'
                                 else:

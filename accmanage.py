@@ -90,12 +90,12 @@ class AccmanageScreen(Screen):
     def update_details(self):
         try:
             store = JsonStore('user_data.json')
-            phone = store.get('user')['value']["phone"]
+            phone = store.get('user')['value']["users_phone"]
 
             # Call the server function to fetch account details and bank names
-            bank_names = app_tables.wallet_users_account.search(phone=phone)
+            bank_names = app_tables.wallet_users_account.search(users_account_phone=phone)
             # bank_names_str = [str(row['bank_name']) for row in bank_names]
-            banks= [[str(row['bank_name']),str(row['account_number'])] for row in bank_names]
+            banks= [[str(row['users_account_bank_name']),str(row['users_account_number'])] for row in bank_names]
             print(banks)
             # for i in range(len(banks)):
             #     print(i[0])
@@ -122,10 +122,10 @@ class AccmanageScreen(Screen):
                                         )
                     account_details_container.add_widget(items)
                 print('yes')
-                phone = JsonStore('user_data.json').get('user')['value']['phone']
+                phone = JsonStore('user_data.json').get('user')['value']['users_phone']
                 # phone['default_accout']=str(bank_name[1])
-                users = app_tables.wallet_users.get(phone=phone)
-                users.update(default_account = bank_name[1])
+                users = app_tables.wallet_users.get(users_phone=phone)
+                users.update(users_default_account = bank_name[1])
             #if user has multiple accounts it will show options to select the default account
             if len(banks)>1:
                 for bank_name in banks:
@@ -145,13 +145,13 @@ class AccmanageScreen(Screen):
             self.hide_loading_animation()
             # Setting on entering
             if len(banks) == 0:
-                phone = JsonStore('user_data.json').get('user')['value']['phone']
-                users = app_tables.wallet_users.get(phone=phone)
-                users.update(default_account=None)
+                phone = JsonStore('user_data.json').get('user')['value']['users_phone']
+                users = app_tables.wallet_users.get(users_phone=phone)
+                users.update(users_default_account=None)
             if len(banks)>1:
-                phone = JsonStore('user_data.json').get('user')['value']['phone']
-                users = app_tables.wallet_users.get(phone=phone)
-                users_default_account = users['default_account']
+                phone = JsonStore('user_data.json').get('user')['value']['users_phone']
+                users = app_tables.wallet_users.get(users_phone=phone)
+                users_default_account = users['users_default_account']
                 print(users_default_account)
                 if users_default_account != None:
                     self.dynmaic_ids[users_default_account].secondary_text='primary account'
@@ -176,12 +176,12 @@ class AccmanageScreen(Screen):
     def show_menu(self,instance,acc_number):
         # print(y)
         store = JsonStore('user_data.json')
-        phone = store.get('user')['value']["phone"]
+        phone = store.get('user')['value']["users_phone"]
 
         # Call the server function to fetch account details and bank names
-        bank_names = app_tables.wallet_users_account.search(phone=phone)
+        bank_names = app_tables.wallet_users_account.search(users_account_phone=phone)
         # bank_names_str = [str(row['bank_name']) for row in bank_names]
-        banks= [[str(row['bank_name']),str(row['account_number'])] for row in bank_names]
+        banks= [[str(row['users_account_bank_name']),str(row['users_account_number'])] for row in bank_names]
 
         if len(banks)>1:
             menu_items = [
@@ -209,11 +209,11 @@ class AccmanageScreen(Screen):
             self.menu.open()
 
     def delete_account(self,instance):
-        phone = JsonStore('user_data.json').get('user')['value']['phone']
-        accounts_table = app_tables.wallet_users_account.get(phone = phone,account_number= int(instance.id))
+        phone = JsonStore('user_data.json').get('user')['value']['users_phone']
+        accounts_table = app_tables.wallet_users_account.get(users_account_phone = phone,users_account_number= int(instance.id))
         for i in accounts_table:
             print(i)
-            if accounts_table['account_number'] == float(instance.id):
+            if accounts_table['users_account_number'] == float(instance.id):
                 accounts_table.delete()
                 self.menu.dismiss()
                 break
@@ -240,7 +240,7 @@ class AccmanageScreen(Screen):
                 # print(self.dynmaic_ids[i].text)
           
         bank_name=x.id
-        phone = JsonStore('user_data.json').get('user')['value']['phone']       
-        users = app_tables.wallet_users.get(phone=phone)
-        users.update(default_account = bank_name)
+        phone = JsonStore('user_data.json').get('user')['value']['users_phone']       
+        users = app_tables.wallet_users.get(users_phone=phone)
+        users.update(users_default_account = bank_name)
         self.menu.dismiss()  

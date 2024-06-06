@@ -171,12 +171,12 @@ class NavbarScreen(Screen):
         store = JsonStore('user_data.json').get('user')['value']
         # Update labels in NavbarScreen
         navbar_screen = self.get_screen('navbar')
-        navbar_screen.ids.username_label.text = store["username"]
-        navbar_screen.ids.email_label.text = store["gmail"]
-        navbar_screen.ids.contact_label.text = store["phone"] 
+        navbar_screen.ids.username_label.text = store["users_username"]
+        navbar_screen.ids.email_label.text = store["users_email"]
+        navbar_screen.ids.contact_label.text = store["users_phone"] 
 
     def generate_qr_code(self):
-        phone = JsonStore('user_data.json').get('user')['value']["phone"]
+        phone = JsonStore('user_data.json').get('user')['value']["users_phone"]
         qr_code = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -201,12 +201,12 @@ class NavbarScreen(Screen):
     
     def profile_view(self):
         store = JsonStore('user_data.json').get('user')['value']
-        username = store["username"]
-        gmail = store["gmail"]
-        phone = store["phone"]
-        aadhaar = store["Aadhaar"]
-        address = store["address"]
-        pan = store["pan"]
+        username = store["users_username"]
+        gmail = store["users_email"]
+        phone = store["users_phone"]
+        aadhaar = store["users_Aadhaar"]
+        address = store["users_address"]
+        pan = store["users_pan"]
         profile_screen = self.manager.get_screen('profile')
         profile_screen.ids.username_label.text = f"{username}"  # Assuming username is at index 1
         profile_screen.ids.email_label.text = f"{gmail}"  # Assuming email is at index 0

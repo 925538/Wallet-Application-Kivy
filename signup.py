@@ -190,15 +190,15 @@ class SignUpScreen(Screen):
 
             else:  # Add user data to the 'login' collection in Anvil
                 app_tables.wallet_users.add_row(
-                    email=gmail,
-                    username=username,
-                    password=password,
-                    phone=float(phone_no),
-                    aadhar=float(aadhar_card),
-                    pan=pan_card,
-                    address=address,
-                    usertype="customer",
-                    banned=False,
+                    users_email=gmail,
+                    users_username=username,
+                    users_password=password,
+                    users_phone=float(phone_no),
+                    users_aadhar=float(aadhar_card),
+                    users_pan=pan_card,
+                    users_address=address,
+                    users_usertype="customer",
+                    users_banned=False,
                 )
 
                 # Show a popup with a success message
@@ -228,7 +228,7 @@ class SignUpScreen(Screen):
 
     @anvil.server.callable
     def is_phone_number_registered(self, phone_number):
-        user = app_tables.wallet_users.get(phone=float(phone_number))
+        user = app_tables.wallet_users.get(users_phone=float(phone_number))
         return user is not None
 
     def dismiss_and_navigate(self):

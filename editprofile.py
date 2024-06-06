@@ -196,17 +196,17 @@ class EditUser(Screen):
             login_table = app_tables.wallet_users
 
             # Check if the user exists
-            user = login_table.get(phone=float(phone))
+            user = login_table.get(users_phone=float(phone))
 
             if user is not None:
                 # Update the user details
                 user.update(
-                    username=username,
-                    email=email,
+                    users_username=username,
+                    users_email=email,
                     # password=password,
-                    aadhar=float(aadhar),
-                    pan=pan,
-                    address=address,
+                    users_aadhar=float(aadhar),
+                    users_pan=pan,
+                    users_address=address,
                 )
 
                 print("User details updated successfully.")

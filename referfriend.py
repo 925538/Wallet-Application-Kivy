@@ -100,16 +100,16 @@ class ReferFriendScreen(Screen):
     def __init__(self, **kwargs):
         super(ReferFriendScreen, self).__init__(**kwargs)
         EventLoop.window.bind(on_keyboard=self.on_key)
-        phone = JsonStore('user_data.json').get('user')['value']['phone']
-        username = JsonStore('user_data.json').get('user')['value']['username']
+        phone = JsonStore('user_data.json').get('user')['value']['users_phone']
+        username = JsonStore('user_data.json').get('user')['value']['users_username']
         self.ids.textinput1.text = username
-        user = app_tables.wallet_users.get(phone=phone)
-        if not user['userreferral']:
+        user = app_tables.wallet_users.get(users_phone=phone)
+        if not user['users_referral']:
             random_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
             self.ids.textinput2.text = random_code
-            user.update(userreferral=random_code)
+            user.update(users_referral=random_code)
         else:
-            self.ids.textinput2.text = user['userreferral']
+            self.ids.textinput2.text = user['users_referral']
 
     def copy_code(self):
         from kivy.utils import ask

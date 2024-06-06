@@ -6,6 +6,7 @@
 # from operator import imod
 # from os import path
 from ast import Global
+from logging import root
 import platform
 import anvil
 from certifi import where
@@ -234,13 +235,13 @@ class Profile(Screen):
         self.manager.add_widget(Factory.EditUser(name='edituser'))
         edit_screen = self.manager.get_screen('edituser')
         store = JsonStore('user_data.json').get('user')['value']
-        edit_screen.ids.username.text = store["username"]
-        edit_screen.ids.email.text = store["email"]
-        edit_screen.ids.phone.text = str(store["phone"])
+        edit_screen.ids.username.text = store["users_username"]
+        edit_screen.ids.email.text = store["users_email"]
+        edit_screen.ids.phone.text = str(store["users_phone"])
         # edit_screen.ids.password.text = store["password"]
-        edit_screen.ids.aadhaar.text = str(store["aadhar"])
-        edit_screen.ids.pan.text = store["pan"]
-        edit_screen.ids.address.text = store["address"]
+        edit_screen.ids.aadhaar.text = str(store["users_aadhar"])
+        edit_screen.ids.pan.text = store["users_pan"]
+        edit_screen.ids.address.text = store["users_address"]
         self.manager.current = 'edituser'
 
     # def save_profile(self):
@@ -389,8 +390,8 @@ class Profile(Screen):
                     except Exception as e:
                         print(f"Error: {e}")
 
-                store = JsonStore('user_data.json').get('user')['value']['phone']
-                table = app_tables.wallet_users.get(phone=store)
+                store = JsonStore('user_data.json').get('user')['value']['users_phone']
+                table = app_tables.wallet_users.get(users_phone=store)
                 # Rotate the image by 90 degrees clockwise
                 if is_tilted(image_path):
                     # print('returned true')
@@ -439,10 +440,11 @@ class Profile(Screen):
                             dashboard_screen.ids.user_image.source = temp_image_path1   #texture = CoreImage(BytesIO(image_data), ext='png',
                                                                                             #filename='image.png').texture
                             self.ids.profile.icon = temp_image_path1
+                            dashboard_screen.ids.Appbar.right_action_items = [[f'{temp_image_path1}', lambda x: dashboard_screen.manage_acc()]]
                             # image_base64 = base64.b64encode(image_bytes).decode('utf-8')
                             
                             pic = anvil.BlobMedia(content_type="image/png", content=image_bytes)
-                            table.update(profile_pic = pic)
+                            table.update(users_profile_pic = pic)
                             # dashboard_screen.user_pic()
                             print('yes updated')
                             break
@@ -464,12 +466,13 @@ class Profile(Screen):
                         # print('yes 3')
                         # updating table  in database
                         picc = anvil.BlobMedia(content_type="image/png", content=imagee_byte)
-                        table.update(profile_pic = picc)
+                        table.update(users_profile_pic = picc)
                         print('yes updated1')
                         # print('yes 4')
                         # providing image to the dashboard screen
                         dashboard_screen.ids.user_image. source=temp_image_path
                         self.ids.profile.icon = temp_image_path
+                        dashboard_screen.ids.Appbar.right_action_items = [[f'{temp_image_path}', lambda x: dashboard_screen.manage_acc()]]
                     except Exception as e:
                         print(e)
                         self.manager.show_notification('Alert!','An error occured.  Please try again.')
@@ -480,9 +483,9 @@ class Profile(Screen):
         self.popup.dismiss()
 
     def on_pre_enter(self):
-        store = JsonStore('user_data.json').get('user')['value']['phone']
-        table = app_tables.wallet_users.get(phone=store)
-        image_stored = table['profile_pic']
+        store = JsonStore('user_data.json').get('user')['value']['users_phone']
+        table = app_tables.wallet_users.get(users_phone=store)
+        image_stored = table['users_profile_pic']
         if image_stored:
             decoded_image_bytes =image_stored.get_bytes()
             with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
@@ -492,3 +495,4 @@ class Profile(Screen):
                 # Close the file to ensure the data is flushed and saved
                 temp_file1.close()
             self.ids.profile.icon = temp_file_path
+            

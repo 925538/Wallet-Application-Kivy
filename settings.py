@@ -181,13 +181,13 @@ class SettingsScreen(Screen):
         self.manager.add_widget(Factory.EditUser(name='edituser'))
         edit_screen = self.manager.get_screen('edituser')
         store = JsonStore('user_data.json').get('user')['value']
-        edit_screen.ids.username.text = store["username"]
-        edit_screen.ids.email.text = store["email"]
-        edit_screen.ids.phone.text = str(store["phone"])
+        edit_screen.ids.username.text = store["users_username"]
+        edit_screen.ids.email.text = store["users_email"]
+        edit_screen.ids.phone.text = str(store["users_phone"])
         # edit_screen.ids.password.text = store["password"]
-        edit_screen.ids.aadhaar.text = str(store["aadhar"])
-        edit_screen.ids.pan.text = store["pan"]
-        edit_screen.ids.address.text = store["address"]
+        edit_screen.ids.aadhaar.text = str(store["users_aadhar"])
+        edit_screen.ids.pan.text = store["users_pan"]
+        edit_screen.ids.address.text = store["users_address"]
         self.manager.current = 'edituser'
 
     def nav_paysetting(self):

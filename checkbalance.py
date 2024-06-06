@@ -136,7 +136,7 @@ class BalanceScreen(Screen):
     def fetch_balances(self):
         try:
             store = JsonStore('user_data.json')
-            phone = store.get('user')['value']["phone"]
+            phone = store.get('user')['value']["users_phone"]
             print(f"Phone number: {phone}")  # Print phone number
             currencies = ['INR', 'USD', 'EUR', 'GBP']  # Add more currencies as needed
             for currency in currencies:
@@ -147,8 +147,8 @@ class BalanceScreen(Screen):
 
     def fetch_and_update_balance(self, phone, currency):
         try:
-            balance_table = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency)
-            balance = balance_table['balance'] if balance_table else print('0')
+            balance_table = app_tables.wallet_users_balance.get(users_balance_phone=phone, users_balance_currency_type=currency)
+            balance = balance_table['users_balance'] if balance_table else print('0')
             print(f"Balance for {currency}: {balance}")  # Print balance
             label_id = f"{currency.lower()}_balance_label"
             if balance is None:

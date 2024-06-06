@@ -257,10 +257,10 @@ class WithdrawScreen(Screen):
     def fetch_bank_names(self):
         try:
             store = JsonStore('user_data.json')
-            phone = store.get('user')['value']["phone"]
+            phone = store.get('user')['value']["users_phone"]
 
-            bank_names = app_tables.wallet_users_account.search(phone=phone)
-            bank_names_str = [str(row['bank_name']) for row in bank_names]
+            bank_names = app_tables.wallet_users_account.search(users_account_phone=phone)
+            bank_names_str = [str(row['users_account_bank_name']) for row in bank_names]
             if bank_names_str:
                 self.menu_list = [
                     {"viewclass": "OneLineListItem", "text": bank_name,
@@ -286,16 +286,18 @@ class WithdrawScreen(Screen):
             pass
 
     def test(self, text):
+        print('yes1')
         self.account_number = None
+        print('yes2')
         self.account_holder_name = None
         self.ids.bank_dropdown.text = text
         store = JsonStore('user_data.json')
-        phone = store.get('user')['value']["phone"]
+        phone = store.get('user')['value']["users_phone"]
 
         try:
-            matching_accounts = app_tables.wallet_users_account.search(phone=phone, bank_name=str(text))
+            matching_accounts = app_tables.wallet_users_account.search(users_account_phone=phone, users_account_bank_name=str(text))
             if matching_accounts:
-                self.account_number = matching_accounts[0]['account_number']
+                self.account_number = matching_accounts[0]['users_account_number']
             else:
                 self.manager.show_notification('Alert!',"Account not found.")
             if self.menu:
@@ -313,8 +315,8 @@ class WithdrawScreen(Screen):
         amount = wdrw_scr.ids.amount_textfield.text
         currency = wdrw_scr.ids.options_button.text  # Get the selected currency from options_button
         date = datetime.now()
-        phone = JsonStore('user_data.json').get('user')['value']["phone"]
-        balance_table = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency)
+        phone = JsonStore('user_data.json').get('user')['value']["users_phone"]
+        balance_table = app_tables.wallet_users_balance.get(users_balance_phone=phone, users_balance_currency_type=currency)
         selected_bank = wdrw_scr.ids.bank_dropdown.text
         print(selected_bank)
 
@@ -330,10 +332,10 @@ class WithdrawScreen(Screen):
 
         try:
             if balance_table is not None:
-                old_balance = balance_table['balance']
+                old_balance = balance_table['users_balance']
                 if amount <= old_balance:
                     new_balance = old_balance - amount
-                    balance_table['balance'] = new_balance
+                    balance_table['users_balance'] = new_balance
                     balance_table.update()
                 else:
                     # toast("Balance is less than the entered amount")
@@ -341,17 +343,19 @@ class WithdrawScreen(Screen):
             else:
                 # toast("You don't have a balance in this currency type")
                 self.manager.show_notification('Alert!',"You don't have a balance in this currency type.")
+            print('here')
             app_tables.wallet_users_transaction.add_row(
-                receiver_phone=float(self.account_number),
-                phone=phone,
-                fund=amount,
-                date=date,
-                transaction_type="Debit",
-                currency = currency
+                users_transaction_receiver_phone=float(self.account_number),
+                users_transaction_phone=phone,
+                users_transaction_fund=amount,
+                users_transaction_date=date,
+                users_transaction_type="Withdrawn",
+                users_transaction_currency = currency
             )
+            print('yes here')
 
             self.manager.show_notification('Success',"Withdrawal successful.")
-            self.ids.balance_lbl.text = str(int(balance_table['balance']))
+            self.ids.balance_lbl.text = str(int(balance_table['users_balance']))
             # self.manager.show_balance()
         except Exception as e:
             print(f"Error withdrawing money: {e}")
@@ -385,7 +389,7 @@ class WithdrawScreen(Screen):
     def menu_callback(self, instance_menu_item):
         print(f"Selected currency: {instance_menu_item}")
         store = JsonStore('user_data.json')
-        phone_no = store.get('user')['value']["phone"]
+        phone_no = store.get('user')['value']["users_phone"]
         total_balance = self.manager.get_total_balance(phone_no, instance_menu_item)
 
         self.ids.options_button.text = instance_menu_item
@@ -413,16 +417,16 @@ class WithdrawScreen(Screen):
 
     def update_balance_label(self, currency):
         store = JsonStore('user_data.json')
-        phone_no = store.get('user')['value']["phone"]
+        phone_no = store.get('user')['value']["users_phone"]
         total_balance = self.manager.get_total_balance(phone_no, currency)
         self.ids.balance_lbl.text = f'{total_balance} {currency}'  #Available Balance: 
 
     def on_pre_enter(self, *args):
         #in this function it will display the balance as per the default currency selected in default currency settings
         store1 = JsonStore('user_data.json')
-        phone_no = store1.get('user')['value']["phone"]
-        user_data=app_tables.wallet_users.get(phone=phone_no)
-        user_default_currency = user_data['defaultcurrency']
+        phone_no = store1.get('user')['value']["users_phone"]
+        user_data=app_tables.wallet_users.get(users_phone=phone_no)
+        user_default_currency = user_data['users_defaultcurrency']
         print(user_default_currency)
         # for icon_btn in self.options_button_icon_mapping:
         if user_default_currency:
@@ -434,18 +438,18 @@ class WithdrawScreen(Screen):
         
         #users data
         
-        users_default_account = user_data['default_account']
+        users_default_account = user_data['users_default_account']
         if users_default_account:
-            ban_name = app_tables.wallet_users_account.get(account_number=float(users_default_account))
+            ban_name = app_tables.wallet_users_account.get(users_account_number=float(users_default_account))
             if ban_name:
-                bank_name = ban_name['bank_name']
+                bank_name = ban_name['users_account_bank_name']
                 self.ids.bank_dropdown.text = bank_name
                 self.test(bank_name)
     
     def called(self,currency):
         store1 = JsonStore('user_data.json')
-        phone_no = store1.get('user')['value']["phone"]
-        user_data=app_tables.wallet_users.get(phone=phone_no)
+        phone_no = store1.get('user')['value']["users_phone"]
+        user_data=app_tables.wallet_users.get(users_phone=phone_no)
         total_balance = self.manager.get_total_balance(phone_no, currency)
         self.ids.options_button.icon = self.options_button_icon_mapping[currency]
         self.ids.options_button.text = currency

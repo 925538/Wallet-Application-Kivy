@@ -213,7 +213,7 @@ class AutoTopupScreen(Screen):
     def menu_callback(self, instance_menu_item):
         print(f"Selected currency: {instance_menu_item}")
         store = JsonStore('user_data.json')
-        phone_no = store.get('user')['value']["phone"]
+        phone_no = store.get('user')['value']["users_phone"]
         total_balance = self.manager.get_total_balance(phone_no, instance_menu_item)
         # Convert the total balance to the selected currency
 
@@ -461,11 +461,11 @@ class AutoTopupCard(MDCard):
     def dropdown(self, button):
         try:
             store = JsonStore('user_data.json')
-            phone = store.get('user')['value']["phone"]
+            phone = store.get('user')['value']["users_phone"]
 
             # Call the server function to fetch account details and bank names
-            bank_names = app_tables.wallet_users_account.search(phone=phone)
-            bank_names_str = [str(row['bank_name']) for row in bank_names]
+            bank_names = app_tables.wallet_users_account.search(users_account_phone=phone)
+            bank_names_str = [str(row['users_account_bank_name']) for row in bank_names]
             print(bank_names_str)
             if bank_names_str:
                 # Create the menu list dynamically based on the fetched bank names
@@ -498,12 +498,12 @@ class AutoTopupCard(MDCard):
         self.account_number = None
         self.bank_dropdown.text = text
         store = JsonStore('user_data.json')
-        phone = store.get('user')['value']["phone"]
+        phone = store.get('user')['value']["users_phone"]
 
         try:
             # Call the server function to fetch account details and update dropdown
-            matching_accounts = app_tables.wallet_users_account.search(phone=phone, bank_name=text)
-            account = [str(row['account_number']) for row in matching_accounts]
+            matching_accounts = app_tables.wallet_users_account.search(users_account_phone=phone, users_account_bank_name=text)
+            account = [str(row['users_account_number']) for row in matching_accounts]
             if matching_accounts:
                 # Fetch the account number from the first matching account
                 self.account_number = account[0]
@@ -527,9 +527,9 @@ class AutoTopupCard(MDCard):
 
     def minimum_balance_topup(self, event):
         store = JsonStore('user_data.json')
-        phone = store.get('user')['value']["phone"]
-        user_table = app_tables.wallet_users.get(phone=phone)
-        if user_table['auto_topup'] == True:
+        phone = store.get('user')['value']["users_phone"]
+        user_table = app_tables.wallet_users.get(users_phone=phone)
+        if user_table['users_auto_topup'] == True:
             money = self.balance.text
             amount = float(money)
             selected_money = self.money_dropdown.text
@@ -548,17 +548,17 @@ class AutoTopupCard(MDCard):
             except Exception as e:
                 self.manager.show_notification('Alert!','An error occurred. Please try again.')
             store = JsonStore('user_data.json')
-            phone = store.get('user')['value']["phone"]
-            balance_table = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency)
+            phone = store.get('user')['value']["users_phone"]
+            balance_table = app_tables.wallet_users_balance.get(users_balance_phone=phone, users_balance_currency_type=currency)
             print(balance_table)
 
             try:
                 if balance_table is not None:
-                    old_balance = balance_table['balance']
-                    user_table['minimum_topup'] = True
+                    old_balance = balance_table['users_balance']
+                    user_table['users_minimum_topup'] = True
                     if old_balance < int(selected_money):
                         new_balance = old_balance + self.exchange_rate_value
-                        balance_table['balance'] = new_balance
+                        balance_table['users_balance'] = new_balance
                         print(f'{new_balance}')
                         balance_table.update()
                         # toast("Minimum-Topup Successful.", duration=5)
@@ -566,20 +566,20 @@ class AutoTopupCard(MDCard):
                         app = App.get_running_app()
                         app.root.current = 'dashboard'
                     else:
-                        user_table['minimum_topup'] = False
+                        user_table['users_minimum_topup'] = False
                         # toast("Auto-topup is not required.")
                         self.manager.show_notification('Alert!','Auto-topup is not required.')
                 else:
                     # toast(f"Insufficient balance in currency {currency}")
                     self.manager.show_notification('Alert!', f"Insufficient balance in currency {currency}")
                 app_tables.wallet_users_transaction.add_row(
-                    receiver_phone=None,
-                    phone=phone,
-                    fund=self.exchange_rate_value,
-                    date=date,
-                    transaction_type=f"{currency} - Credit",
-                    transaction_status="Minimum-Topups",
-                    currency = currency
+                    users_transaction_receiver_phone=None,
+                    users_transaction_phone=phone,
+                    users_transaction_fund=self.exchange_rate_value,
+                    users_transaction_date=date,
+                    users_transaction_type=f"{currency} - Credit",
+                    users_transaction_status="Minimum-Topups",
+                    users_transaction_currency = currency
                 )
 
                 # try:
@@ -791,11 +791,11 @@ class ScheduledTopupCard(MDCard):
     def dropdown(self, button):
         try:
             store = JsonStore('user_data.json')
-            phone = store.get('user')['value']["phone"]
+            phone = store.get('user')['value']["users_phone"]
 
             # Call the server function to fetch account details and bank names
-            bank_names = app_tables.wallet_users_account.search(phone=phone)
-            bank_names_str = [str(row['bank_name']) for row in bank_names]
+            bank_names = app_tables.wallet_users_account.search(users_account_phone=phone)
+            bank_names_str = [str(row['users_account_bank_name']) for row in bank_names]
             print(bank_names_str)
             if bank_names_str:
                 # Create the menu list dynamically based on the fetched bank names
@@ -828,12 +828,12 @@ class ScheduledTopupCard(MDCard):
         self.account_number = None
         self.bank_dropdown.text = text
         store = JsonStore('user_data.json')
-        phone = store.get('user')['value']["phone"]
+        phone = store.get('user')['value']["users_phone"]
 
         try:
             # Call the server function to fetch account details and update dropdown
-            matching_accounts = app_tables.wallet_users_account.search(phone=phone, bank_name=text)
-            account = [str(row['account_number']) for row in matching_accounts]
+            matching_accounts = app_tables.wallet_users_account.search(users_account_phone=phone, users_account_bank_name=text)
+            account = [str(row['users_account_number']) for row in matching_accounts]
             if matching_accounts:
                 # Fetch the account number from the first matching account
                 self.account_number = account[0]
@@ -856,9 +856,9 @@ class ScheduledTopupCard(MDCard):
 
     def timely_topup(self, event):
         store = JsonStore('user_data.json')
-        phone = store.get('user')['value']["phone"]
-        user_table = app_tables.wallet_users.get(phone=phone)
-        if user_table['auto_topup'] == True:
+        phone = store.get('user')['value']["users_phone"]
+        user_table = app_tables.wallet_users.get(users_phone=phone)
+        if user_table['users_auto_topup'] == True:
             money = self.balance.text
             amount = float(money)
             selected_frequency = self.frequency_dropdown.text
@@ -876,10 +876,10 @@ class ScheduledTopupCard(MDCard):
                 print("Error fetching exchange rates.")
                 self.manager.show_notification('Alert!','An error occurred. Please try again.')
             store = JsonStore('user_data.json')
-            phone = store.get('user')['value']["phone"]
-            balance_table = app_tables.wallet_users_balance.get(phone=phone, currency_type=currency)
+            phone = store.get('user')['value']["users_phone"]
+            balance_table = app_tables.wallet_users_balance.get(users_balance_phone=phone, users_balance_currency_type=currency)
             print(balance_table)
-            user_table = app_tables.wallet_users.get(phone=phone)
+            user_table = app_tables.wallet_users.get(users_phone=phone)
 
             try:
                 # Calculate the time interval based on the frequency
@@ -900,26 +900,26 @@ class ScheduledTopupCard(MDCard):
 
                 try:
                     if user_table is not None:
-                        if (user_table['last_auto_topup_time'] is None) or (
-                                (current_datetime - user_table['last_auto_topup_time']).days >= interval_days):
-                            user_table['timely_topup'] = True
-                            user_table['timely_topup_interval'] = selected_frequency
-                            old_balance = balance_table['balance']
+                        if (user_table['users_last_auto_topup_time'] is None) or (
+                                (current_datetime - user_table['users_last_auto_topup_time']).days >= interval_days):
+                            user_table['users_timely_topup'] = True
+                            user_table['users_timely_topup_interval'] = selected_frequency
+                            old_balance = balance_table['users_balance']
                             new_balance = old_balance + self.exchange_rate_value
-                            balance_table['balance'] = new_balance
+                            balance_table['users_balance'] = new_balance
                             balance_table.update()
                             # toast("Timely-Topup Successful.", duration=5)
                             self.manager.show_notification('Success','Timely-Topup successful.')
                             app_tables.wallet_users_transaction.add_row(
-                                receiver_phone=None,
-                                phone=phone,
-                                fund=self.exchange_rate_value,
-                                date=current_datetime,
-                                transaction_type=f"{currency} - Credit",
-                                transaction_status="Timely-Topups",
-                                currency = currency
+                                users_transaction_receiver_phone=None,
+                                users_transaction_phone=phone,
+                                users_transaction_fund=self.exchange_rate_value,
+                                users_transaction_date=current_datetime,
+                                users_transaction_type=f"{currency} - Credit",
+                                users_transaction_status="Timely-Topups",
+                                users_transaction_currency = currency
                             )
-                            user_table['last_auto_topup_time'] = current_datetime
+                            user_table['users_last_auto_topup_time'] = current_datetime
                             try:
                                 app = App.get_running_app()
                                 app.root.current = 'dashboard'
@@ -991,9 +991,9 @@ class SetOnOffScreen(Screen):
         super(SetOnOffScreen, self).__init__(**kwargs)
         EventLoop.window.bind(on_keyboard=self.on_key)
         store = JsonStore('user_data.json')
-        phone = store.get('user')['value']["phone"]
-        user_table = app_tables.wallet_users.get(phone=phone)
-        if user_table['auto_topup'] == True:
+        phone = store.get('user')['value']["users_phone"]
+        user_table = app_tables.wallet_users.get(users_phone=phone)
+        if user_table['users_auto_topup'] == True:
             button_text = 'ON'
             button_color = (0, 0.7, 1, 1)  # Blue color
         else:
@@ -1033,16 +1033,16 @@ class SetOnOffScreen(Screen):
 
     def toggle_auto_topup(self, instance):
         store = JsonStore('user_data.json')
-        phone = store.get('user')['value']["phone"]
-        user_table = app_tables.wallet_users.get(phone=phone)
+        phone = store.get('user')['value']["users_phone"]
+        user_table = app_tables.wallet_users.get(users_phone=phone)
 
-        if user_table['auto_topup'] == True:
-            user_table['auto_topup'] = False
+        if user_table['users_auto_topup'] == True:
+            user_table['users_auto_topup'] = False
             self.auto_topup_button.text = 'OFF'
             self.auto_topup_button.background_color = (0.5, 0.5, 0.5, 1)
             print("Auto top-up disabled")
         else:
-            user_table['auto_topup'] = True
+            user_table['users_auto_topup'] = True
             self.auto_topup_button.text = 'ON'
             self.auto_topup_button.background_color = (0, 0.7, 1, 1)
             print("Auto top-up enabled")
