@@ -129,18 +129,30 @@ class Transaction(Screen):
             self.filter_dialog.content_cls.add_widget(items[i])
 
         self.filter_dialog.open()
-    
+        if (self.currency or self.type_filt_credit or self.type_filt_debit or self.start_date or self.end_date) :
+            print('has values')
+            self.currency=''
+            self.type_filt_debit=''
+            self.type_filt_credit=''
+            self.start_date=''
+            self.end_date=''
+
+    # def all_func(self):
+    #     self.clear_all()
+        
+        
     def clear_all(self):
         self.currency=''
         self.type_filt_debit=''
         self.type_filt_credit=''
         self.start_date=''
         self.end_date=''
+        return
         # self.credit_type_add.bg_color=(0,0,0,0)
         # self.debit_type_add.bg_color = (0,0,0,0)
 
-    def filter_currency(self,main_insta):
-
+    def filter_currency(self,main_button):
+        print('printing',main_button)
         self.filt_currency = MDDialog(
             title="Filter Payments",
             type="custom",
@@ -153,7 +165,7 @@ class Transaction(Screen):
             )
         for currency in self.options_button_icon_mapping:
             id = currency
-            item = OneLineListItem( id=id,text = currency,on_release = lambda x,main_insta=main_insta:self.selected_currency(x,main_insta))
+            item = OneLineListItem( id=id,text = currency,on_release = lambda x,main_insta=main_button:self.selected_currency(x,main_insta))
             self.filt_currency.content_cls.add_widget(item)
             self.dynamic_ids_currency[id] = item
         self.filt_currency.open()
@@ -176,7 +188,6 @@ class Transaction(Screen):
         self.type_filt_credit = type.text
         self.credit_type_add = type
         print(self.type_filt_credit)
-
         if hasattr(type, 'selected') and type.selected:
             type.bg_color = (0,0,0,0)
             type.selected = False
@@ -184,8 +195,9 @@ class Transaction(Screen):
         else:
             type.bg_color = '#148efe'
             type.selected = True
-        def color_change(self,type):
-            type.bg_color = (0,0,0,0)
+        
+        # def color_change(self,type):
+        #     type.bg_color = (0,0,0,0)
         # self.type_filt = MDDialog(
         #     title="Filter Payments",
         #     type="custom",

@@ -14,6 +14,7 @@ from kivymd.uix.screen import Screen
 from kivy.core.image import  Image as CoreImage
 from io import BytesIO
 from kivy.core.window import Keyboard
+import tempfile
 
 KV = """
 <SignInScreen>:
@@ -39,15 +40,24 @@ KV = """
             orientation: 'vertical'
 
             MDLabel:
+                text: "Welcome to G-Wallet"
+                font_size: 36
+                halign: "center"
+                bold: True
+
+            Widget:
+                size_hint_y:None
+                height:dp(5)
+            MDLabel:
                 text: "LOGIN"
-                font_size: 46
+                font_size: 32
                 halign: "center"
                 bold: True
 
             Widget:
                 size_hint_y: None
                 height: '0.5dp'
-
+            
             MDTextField:
                 id: input_text
                 hint_text: "Mobile Number/Email ID"
@@ -287,6 +297,13 @@ class SignInScreen(Screen):
                                 core_image =  CoreImage(BytesIO(decoded_image_bytes), ext='png',filename='image.png')
                                 print(core_image)
                                 dashboard.ids.user_image.texture = core_image.texture
+                                with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
+                                    temp_file_path = temp_file1.name
+                                    # Write the decoded image data to the temporary file
+                                    temp_file1.write(decoded_image_bytes)
+                                    # Close the file to ensure the data is flushed and saved
+                                    temp_file1.close()
+                                dashboard.ids.Appbar.right_action_items = [[f'{temp_file_path}', lambda x: self.manage_acc()]]
                         except Exception as e:
                             print(e)
                         self.manager.current='dashboard'

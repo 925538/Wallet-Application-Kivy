@@ -50,8 +50,8 @@ from io import BytesIO
 from kivymd.uix.label import MDIcon
 from kivy.uix.button import Button
 from kivy.uix.anchorlayout import AnchorLayout
-
 import tempfile
+
 navigation_helper = """
 <DashBoardScreen>:
     MDNavigationLayout:
@@ -826,7 +826,7 @@ navigation_helper = """
                                 size: dp(20), dp(20)
                                 pos_hint:{"center_y":0.5} 
                             MDLabel:
-                                text: "Manage account"
+                                text: "View Profile"
                                 theme_text_color: "Custom"  
                                 text_color: 0, 0, 0, 1
                                 font_size: "15sp"
@@ -1059,7 +1059,7 @@ class DashBoardScreen(Screen):
         # Update the labels with user data
         profile_screen.ids.username_label.text = f"Username: {username}"
         profile_screen.ids.email_label.text = f"Email: {gmail}"
-
+        profile_screen.ids.contact_label.text = f"Contact: {phone}"
         profile_screen.ids.aadhaar_label.text = f"Aadhar: {aadhaar}"
         profile_screen.ids.pan_label.text = f"Pan no: {pan}"
         profile_screen.ids.address_label.text = f"Address: {address}"
