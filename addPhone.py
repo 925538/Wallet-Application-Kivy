@@ -474,6 +474,7 @@ class UserDetailsScreen(Screen):
                     users_transaction_fund=amount,
                     users_transaction_date=date,
                     users_transaction_type="Debit",
+                    users_transaction_status = 'transfered-to',
                     users_transaction_currency = 'INR'
                 )
 
@@ -496,6 +497,7 @@ class UserDetailsScreen(Screen):
                         users_transaction_fund=amount,
                         users_transaction_date=date,
                         users_transaction_type="Credit",
+                        users_transaction_status = 'received-from',
                         users_transaction_currency='INR'
                     )
                     Clock.schedule_once(lambda dt: self.clear_text_field(), 0.1)
