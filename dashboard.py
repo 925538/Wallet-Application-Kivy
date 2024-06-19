@@ -51,7 +51,8 @@ from kivymd.uix.label import MDIcon
 from kivy.uix.button import Button
 from kivy.uix.anchorlayout import AnchorLayout
 import tempfile
-
+from datetime import datetime
+from kivymd.uix.card import MDSeparator
 navigation_helper = """
 <DashBoardScreen>:
     MDNavigationLayout:
@@ -973,9 +974,6 @@ class DashBoardScreen(Screen):
     def get_username(self):
         store = JsonStore('user_data.json').get('user')['value']
         return store["users_username"]
-
-    def go_back(self):
-        self.manager.current = 'dashboard'
     
     def nav_addPhone(self):
         # Create a modal view for the loading animation
@@ -1207,6 +1205,22 @@ class DashBoardScreen(Screen):
     def nav_editprofile(self):
         self.manager.add_widget(Factory.EditUser(name='edituser'))
         self.manager.current = 'edituser'
+        edit=self.manager.get_screen('edituser')
+        store = JsonStore('user_data.json').get('user')['value']
+        username = store["users_username"]
+        gmail = store["users_email"]
+        phone = store["users_phone"]
+        aadhaar = store["users_aadhar"]
+        address = store["users_address"]
+        pan = store["users_pan"]
+
+        # Update the labels with user data
+        edit.ids.username.text = f"{username}"
+        edit.ids.email.text = f"{gmail}"
+        edit.ids.phone.text = f"{phone}"
+        edit.ids.aadhaar.text = f"{aadhaar}"
+        edit.ids.pan.text = f"{pan}"
+        edit.ids.address.text = f"{address}"
 
     def nav_transfer(self):
         # Create a modal view for the loading animation
@@ -1430,6 +1444,12 @@ class DashBoardScreen(Screen):
                 fund_currency = f"{transaction['users_transaction_currency']}"
                 lowered_currency = fund_currency.lower()
                 fund_currency1 = f"currency-{lowered_currency}"
+                transaction_datetime_obj = str(transaction_datetime).split(" ")
+                transaction_time = str(transaction_datetime_obj[1]).split(".")
+                transaction_time = transaction_time[0]
+                time_obj = datetime.strptime(transaction_time, "%H:%M:%S")
+                am_pm = "AM" if time_obj.hour < 12 else "PM"
+                formatted_time = time_obj.strftime("%I:%M: ") + am_pm
                 print(fund_currency1)
                 if transaction_date != current_date:
                     current_date = transaction_date
@@ -1439,28 +1459,76 @@ class DashBoardScreen(Screen):
 
                     trans_screen.ids.transaction_list.add_widget(list1)
 
-                transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(36))
+                main_container = BoxLayout(orientation='vertical', size_hint_y=None, height=dp(46))
+                timing_label = MDLabel(text=f"{formatted_time}", font_style="Caption", pos_hint={"center_x": 0.62})
+                transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(46))
 
                 # Add transaction details
-                if transaction['users_transaction_type'] == 'Withdrawn' or transaction['users_transaction_type'] == 'Deposited':
-                    print('inside cond')
-                    uer = app_tables.wallet_users.get(users_phone = phone)
-                    transactions_text = uer['users_username']
+                if transaction['users_transaction_type'] == 'Withdrawn' :
+                    transactions_text = 'Withdrawn'
+                            
+                if transaction['users_transaction_type'] == 'Deposited':
+                    transactions_text = 'Deposit'
+
+                if transaction['users_transaction_type'] == 'Auto Topup':
+                    transactions_text = 'Auto topup'
+
+                imagee = Image(size_hint_y=None,height='44dp',size_hint_x=None,width='30dp',pos_hint={'center_x':0.5})
+                if transaction['users_transaction_type'] == 'Withdrawn' or transaction['users_transaction_type'] == 'Deposited' or transaction['users_transaction_type'] == 'Auto Topup':
+                    details = app_tables.wallet_users.get(users_phone = phone)
+                    print(phone)
+                    try:
+                        if details['users_profile_pic']:
+                            print('coming')
+                            decoded_image_bytes =details['users_profile_pic'].get_bytes()
+                            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
+                                temp_file_path = temp_file1.name
+                                # Write the decoded image data to the temporary file
+                                temp_file1.write(decoded_image_bytes)
+                                # Close the file to ensure the data is flushed and saved
+                                temp_file1.close()
+                            imagee.source=temp_file_path
+                        else:
+                            imagee.source='images/user.png'
+                    except Exception as e:
+                        print(e)
+
+                elif transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Debit':
+                    details = app_tables.wallet_users.get(users_phone = transaction['users_transaction_receiver_phone'])
+                    try:
+                        if details['users_profile_pic']:
+                            print('coming')
+                            decoded_image_bytes =details['users_profile_pic'].get_bytes()
+                            decoded_image_bytes =details['users_profile_pic'].get_bytes()
+                            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
+                                temp_file_path = temp_file1.name
+                                # Write the decoded image data to the temporary file
+                                temp_file1.write(decoded_image_bytes)
+                                # Close the file to ensure the data is flushed and saved
+                                temp_file1.close()
+                            imagee.source=temp_file_path
+                        else:
+                            imagee.source='images/user.png'
+                    except Exception as e:
+                        print(e)
                 if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Debit':
                     user = app_tables.wallet_users.get(users_phone = transaction['users_transaction_receiver_phone'] )
                     transactions_text = user['users_username']
+                
                 transaction_item_widget = OneLineListItem(text=f"{transactions_text}", theme_text_color='Custom',
                                                         text_color=[0, 0, 0, 1], height=dp(25), divider=None)
+                
+                transaction_container.add_widget(imagee)
                 transaction_container.add_widget(transaction_item_widget)
 
                 transaction_container.add_widget(Widget(size_hint_x=None, width=dp(20)))
 
-                if transaction['users_transaction_type'] == 'Credit':
+                if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Deposited' or transaction['users_transaction_type'] == 'Auto Topup':
                     fund_color = [0, 0.5, 0, 1]
                     sign = '+'
-                elif transaction['users_transaction_type'] == 'Deposited':
-                    fund_color = [0, 0.5, 0, 1]
-                    sign = '+'
+                # elif transaction['users_transaction_type'] == 'Debit' or :
+                #     fund_color = [0, 0.5, 0, 1]
+                #     sign = '+'
                 else:
                     fund_color = [1, 0, 0, 1]
                     sign = '-'
@@ -1474,7 +1542,7 @@ class DashBoardScreen(Screen):
                 # trans_screen.ids.transaction_list.add_widget(transaction_container)
 
                 icon = MDIcon(icon=fund_currency1, theme_text_color='Custom', text_color=fund_color,
-                                        size_hint=(None, None), size=(dp(5), dp(5)), pos_hint={'center_y': 0.5, 'top': 0.7})
+                                        size_hint=(None, None), size=(dp(5), dp(5)), pos_hint={'center_y': 0.5,})
                             
                 sign_label =  MDLabel(text=f"{sign}", theme_text_color='Custom', text_color=fund_color,
                                     halign='right')
@@ -1484,7 +1552,11 @@ class DashBoardScreen(Screen):
                 transaction_container.add_widget(sign_label)
                 transaction_container.add_widget(icon)
                 transaction_container.add_widget(fund_label)
-                trans_screen.ids.transaction_list.add_widget(transaction_container)
+                main_container.add_widget(transaction_container)
+                main_container.add_widget(timing_label)
+                trans_screen.ids.transaction_list.add_widget(main_container)
+                trans_screen.ids.transaction_list.add_widget(Widget(size_hint_y=None,height=dp(10)))
+                trans_screen.ids.transaction_list.add_widget(MDSeparator(height = dp(1)))
         except Exception as e:
             print(f"Error getting transaction history: {e} ,{traceback.format_exc()}")
 

@@ -349,7 +349,7 @@ class AddMoneyScreen(Screen):
         print(amount)
         # print("amount " + amount)
         bank_name = wallet_scr.ids.bank_dropdown.text
-        print(bank_name)
+        print('printing bank',bank_name)
         date = datetime.now()
         for i in self.options_button_icon_mapping.keys():
             print('yes',i)
@@ -405,7 +405,8 @@ class AddMoneyScreen(Screen):
                     users_transaction_date=date,
                     users_transaction_type="Deposited",
                     users_transaction_status="Wallet-Topup",
-                    users_transaction_currency = currency
+                    users_transaction_currency = currency,
+                    users_transaction_bank_name=bank_name
                 )
                 # Show a success toast
                 # toast("Money added successfully.")

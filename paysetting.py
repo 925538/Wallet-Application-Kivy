@@ -34,7 +34,7 @@ KV = '''
 
                     BoxLayout: 
                         size_hint_y: None
-                        height: dp(260)
+                        height: dp(208)
                         pos_hint: {'center_x': 0.45, 'y': 220}        
 
                         BoxLayout:
@@ -67,14 +67,14 @@ KV = '''
                                     icon: "bell-check-outline"
                                     theme_text_color: 'Custom'
                                     text_color: get_color_from_hex("#3489eb")     
-                            OneLineIconListItem:
-                                text: "Default currency"
-                                on_press:root.currency_set()
-                                IconLeftWidget:
-                                    id:curr_icon
-                                    icon:""
-                                    theme_text_color: 'Custom'
-                                    text_color: get_color_from_hex("#3489eb")
+                            # OneLineIconListItem:
+                            #     text: "Default currency"
+                            #     on_press:root.currency_set()
+                            #     IconLeftWidget:
+                            #         id:curr_icon
+                            #         icon:""
+                            #         theme_text_color: 'Custom'
+                            #         text_color: get_color_from_hex("#3489eb")
 
 '''
 Builder.load_string(KV)
@@ -98,25 +98,25 @@ class PaysettingScreen(Screen):
             return True  # Indicates that the key event has been handled
         return False
 
-    def currency_set(self):
-        sm = self.manager
-        defaultcurrency = Factory.DefaultCurrency(name='defaultcurrency')
-        sm.add_widget(defaultcurrency)
-        sm.current = 'defaultcurrency'
+    # def currency_set(self):
+    #     sm = self.manager
+    #     defaultcurrency = Factory.DefaultCurrency(name='defaultcurrency')
+    #     sm.add_widget(defaultcurrency)
+    #     sm.current = 'defaultcurrency'
 
-    def on_enter(self):
-        options_button_icon_mapping = {
-            "INR": "currency-inr",
-            "GBP": "currency-gbp",
-            "USD": "currency-usd",
-            "EUR": "currency-eur"
-        }
-        # print(self.ids.keys())
-        # setting the default currency icon based on currency selected
-        phone = JsonStore("user_data.json").get('user')['value']['users_phone']
-        data = app_tables.wallet_users.get(users_phone=phone)
-        currency = data['users_defaultcurrency']
-        if currency:
-            self.ids.curr_icon.icon = options_button_icon_mapping[currency]
-        else:
-            self.ids.curr_icon.icon = options_button_icon_mapping['INR']
+    # def on_enter(self):
+    #     options_button_icon_mapping = {
+    #         "INR": "currency-inr",
+    #         "GBP": "currency-gbp",
+    #         "USD": "currency-usd",
+    #         "EUR": "currency-eur"
+    #     }
+    #     # print(self.ids.keys())
+    #     # setting the default currency icon based on currency selected
+    #     phone = JsonStore("user_data.json").get('user')['value']['users_phone']
+    #     data = app_tables.wallet_users.get(users_phone=phone)
+    #     currency = data['users_defaultcurrency']
+    #     if currency:
+    #         self.ids.curr_icon.icon = options_button_icon_mapping[currency]
+    #     else:
+    #         self.ids.curr_icon.icon = options_button_icon_mapping['INR']

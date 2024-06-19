@@ -418,6 +418,10 @@ class AutoTopupCard(MDCard):
         bank_dropdown.bind(on_release=lambda x: self.dropdown(bank_dropdown))
         parent_layout.add_widget(bank_dropdown)
         self.bank_dropdown = bank_dropdown
+        # storee=JsonStore('user_data.json').get('user')['value']['users_phone']
+        # user=app_tables.wallet_users.get(users_phone=storee)
+        # if user['users_default_account'] is not None:
+        #     self.bank_dropdown =  user['users_default_account']
 
     def add_proceed(self, parent_layout):
         button_2 = MDFlatButton(text='Proceed to add')
@@ -493,10 +497,13 @@ class AutoTopupCard(MDCard):
         finally:
             # No need to close a connection in Firebase Realtime Database
             pass
-
+    bank_name=''
     def test(self, text):
         self.account_number = None
         self.bank_dropdown.text = text
+        self.bank_name=text
+        print('bank name',text)
+
         store = JsonStore('user_data.json')
         phone = store.get('user')['value']["users_phone"]
 
@@ -577,9 +584,10 @@ class AutoTopupCard(MDCard):
                     users_transaction_phone=phone,
                     users_transaction_fund=self.exchange_rate_value,
                     users_transaction_date=date,
-                    users_transaction_type=f"{currency} - Credit",
-                    users_transaction_status="Minimum-Topups",
-                    users_transaction_currency = currency
+                    users_transaction_type=f"Auto Topup",
+                    users_transaction_status="Minimum-Topup",
+                    users_transaction_currency = currency,
+                    users_transaction_bank_name=self.bank_name
                 )
 
                 # try:
@@ -641,7 +649,7 @@ class ScheduledTopupCard(MDCard):
     is_visible = BooleanProperty(False)
     frequency_dropdown = None
     balance = None
-
+    bank_name=None
     def __init__(self, manager=None, show_error_popup=None, **kwargs):
         self.manager = manager
         self.show_error_popup = show_error_popup
@@ -827,6 +835,7 @@ class ScheduledTopupCard(MDCard):
     def test(self, text):
         self.account_number = None
         self.bank_dropdown.text = text
+        self.bank_name=text
         store = JsonStore('user_data.json')
         phone = store.get('user')['value']["users_phone"]
 
@@ -915,9 +924,10 @@ class ScheduledTopupCard(MDCard):
                                 users_transaction_phone=phone,
                                 users_transaction_fund=self.exchange_rate_value,
                                 users_transaction_date=current_datetime,
-                                users_transaction_type=f"{currency} - Credit",
+                                users_transaction_type=f"Auto Topup",
                                 users_transaction_status="Timely-Topups",
-                                users_transaction_currency = currency
+                                users_transaction_currency = currency,
+                                users_transaction_bank_name=self.bank_name
                             )
                             user_table['users_last_auto_topup_time'] = current_datetime
                             try:
