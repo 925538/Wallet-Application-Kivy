@@ -187,7 +187,8 @@ class Topup(Screen):
                     users_transaction_fund=self.exchange_rate_value,
                     users_transaction_date=date,
                     users_transaction_type="Credit",
-                    users_transaction_currency = currency
+                    users_transaction_currency = currency,
+                    users_transaction_bank_name=bank_name
                 )
                 # Show a success toast
                 # toast("Money added successfully.")

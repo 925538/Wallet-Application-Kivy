@@ -318,7 +318,7 @@ class WithdrawScreen(Screen):
         phone = JsonStore('user_data.json').get('user')['value']["users_phone"]
         balance_table = app_tables.wallet_users_balance.get(users_balance_phone=phone, users_balance_currency_type=currency)
         selected_bank = wdrw_scr.ids.bank_dropdown.text
-        print(selected_bank)
+        print('printing',selected_bank)
 
         if not selected_bank != "Select bank account" or not amount or not currency:
             self.manager.show_notification("Alert!","Please fill in all fields.")
@@ -350,7 +350,8 @@ class WithdrawScreen(Screen):
                 users_transaction_fund=amount,
                 users_transaction_date=date,
                 users_transaction_type="Withdrawn",
-                users_transaction_currency = currency
+                users_transaction_currency = currency,
+                users_transaction_bank_name=selected_bank
             )
             print('yes here')
 

@@ -7,15 +7,17 @@ from kivy.lang import Builder
 from kivymd.uix.screen import Screen
 from kivy.metrics import dp
 from kivy.storage.jsonstore import JsonStore
-from kivymd.uix.list import TwoLineAvatarIconListItem,ThreeLineAvatarIconListItem
+from kivymd.uix.list import TwoLineAvatarIconListItem
 from anvil.tables import app_tables
 from kivymd.uix.spinner import MDSpinner
+from numpy import imag
 from addAccount import AddAccountScreen
 from kivymd.uix.menu import MDDropdownMenu
-from kivymd.uix.list import IconRightWidget
+from kivymd.uix.list import IconRightWidget,IconLeftWidget
 from kivy.properties import DictProperty
 from kivy.base import EventLoop
-
+from kivy.uix.image import Image
+import tempfile
 KV = '''
 <AccmanageScreen>:
     BoxLayout:
@@ -109,17 +111,47 @@ class AccmanageScreen(Screen):
             # right_action= [["dots-vertical", lambda x: self.callback(x)]]
             print(self.ids.keys())
             #if there is only one bank account of the user it will set that account to default
+            # imagees=Image()
             if len(banks) == 1:
+                print('yes entering')
                 for bank_name in banks:
                     id=bank_name[1]
-                    items=TwoLineAvatarIconListItem(
-                                        IconRightWidget(id=id,icon="dots-vertical",on_release =lambda x: self.show_menu(x,bank_name[1])),
-                                        id=id, #f'{bank_names_str[0]}',
-                                        text=f'{bank_name[0]}',
-                                        secondary_text='primary account',
-                                        # tertiary_text='primary account',
-                                        # on_press=lambda bank_name: self.setting_default_account(f'{bank_name}'),
-                                        )
+                    bank_images = app_tables.wallet_users_account.get(users_account_phone=phone,users_account_number=int(bank_name[1]))
+                    try:
+                        print('coming')
+                        if bank_images['users_account_bank_icon']:
+                            print('coming')
+                            decoded_image_bytes =bank_images['users_account_bank_icon'].get_bytes()
+                            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
+                                temp_file_path = temp_file1.name
+                                # Write the decoded image data to the temporary file
+                                temp_file1.write(decoded_image_bytes)
+                                # Close the file to ensure the data is flushed and saved
+                                temp_file1.close()
+                            # imagees.source=temp_file_path
+                            # account_details_container.add_widget(imagees)
+                    except Exception as e:
+                        print(e)
+                    if bank_images['users_account_bank_icon']:
+                        items=TwoLineAvatarIconListItem(
+                                            IconLeftWidget(icon=temp_file_path,size_hint=(None,None),height='35dp',width='35dp'),
+                                            IconRightWidget(id=id,icon="dots-vertical",on_release =lambda x: self.show_menu(x,bank_name[1])),
+                                            id=id, #f'{bank_names_str[0]}',
+                                            text=f'{bank_name[0]}',
+                                            secondary_text='primary account',
+                                            # tertiary_text='primary account',
+                                            # on_press=lambda bank_name: self.setting_default_account(f'{bank_name}'),
+                                            )
+                    else:
+                        items=TwoLineAvatarIconListItem(
+                                            IconRightWidget(id=id,icon="dots-vertical",on_release =lambda x: self.show_menu(x,bank_name[1])),
+                                            id=id, #f'{bank_names_str[0]}',
+                                            text=f'{bank_name[0]}',
+                                            secondary_text='primary account',
+                                            # tertiary_text='primary account',
+                                            # on_press=lambda bank_name: self.setting_default_account(f'{bank_name}'),
+                                            )
+                    
                     account_details_container.add_widget(items)
                 print('yes')
                 phone = JsonStore('user_data.json').get('user')['value']['users_phone']
@@ -130,14 +162,39 @@ class AccmanageScreen(Screen):
             if len(banks)>1:
                 for bank_name in banks:
                     id = bank_name[1]
-                    items=TwoLineAvatarIconListItem(
-                                        
-                                        IconRightWidget(id=id,icon="dots-vertical",on_release =lambda x: self.show_menu(x,bank_name[1])),
-                                        id=id,
-                                        text=f'{bank_name[0]}',
-                                        # secondary_text = f'{bank_name[1]}'
-                                        # on_press=lambda bank_name: self.setting_default_account(f'{bank_name}'),
-                                        )
+                    bank_images = app_tables.wallet_users_account.get(users_account_phone=phone,users_account_number=int(bank_name[1]))
+                    try:
+                        print('coming')
+                        if bank_images['users_account_bank_icon']:
+                            print('coming')
+                            decoded_image_bytes =bank_images['users_account_bank_icon'].get_bytes()
+                            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
+                                temp_file_path = temp_file1.name
+                                # Write the decoded image data to the temporary file
+                                temp_file1.write(decoded_image_bytes)
+                                # Close the file to ensure the data is flushed and saved
+                                temp_file1.close()
+                            # imagees.source=temp_file_path
+                            # account_details_container.add_widget(imagees)
+                    except Exception as e:
+                        print(e)
+                    if bank_images['users_account_bank_icon']:
+                        items=TwoLineAvatarIconListItem(
+                                            IconLeftWidget(icon=temp_file_path,size_hint=(None,None),height='35dp',width='35dp'),
+                                            IconRightWidget(id=id,icon="dots-vertical",on_release =lambda x: self.show_menu(x,bank_name[1])),
+                                            id=id,
+                                            text=f'{bank_name[0]}',
+                                            # secondary_text = f'{bank_name[1]}'
+                                            # on_press=lambda bank_name: self.setting_default_account(f'{bank_name}'),
+                                            )
+                    else:
+                        items=TwoLineAvatarIconListItem(
+                                            IconRightWidget(id=id,icon="dots-vertical",on_release =lambda x: self.show_menu(x,bank_name[1])),
+                                            id=id,
+                                            text=f'{bank_name[0]}',
+                                            # secondary_text = f'{bank_name[1]}'
+                                            # on_press=lambda bank_name: self.setting_default_account(f'{bank_name}'),
+                                            )
                     # items.add_widget()
                     account_details_container.add_widget(items)
                     self.dynmaic_ids[id] = items
@@ -155,6 +212,11 @@ class AccmanageScreen(Screen):
                 print(users_default_account)
                 if users_default_account != None:
                     self.dynmaic_ids[users_default_account].secondary_text='primary account'
+                for i in self.dynmaic_ids:
+                    if i != users_default_account:
+                        print('coming to this')
+                        self.dynmaic_ids[i].secondary_text=' '
+
         except Exception as e:
             print(f"Error updating details: {e}")
             self.manager.show_notification('Alert!','Some error occured try again.')
@@ -236,7 +298,7 @@ class AccmanageScreen(Screen):
                 print('yes',self.dynmaic_ids[i])
                 self.dynmaic_ids[i].secondary_text='primary account'
             else:
-                self.dynmaic_ids[i].secondary_text=''
+                self.dynmaic_ids[i].secondary_text=' '
                 # print(self.dynmaic_ids[i].text)
           
         bank_name=x.id

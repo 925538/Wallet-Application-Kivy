@@ -87,6 +87,7 @@ KV = """
                 color_active: 1, 1, 1, 1
                 normal_color: app.theme_cls.accent_color
                 line_color_normal: colors['Gray']['500']
+                password:True
 
             MDTextButton:
                 text: "     Forgot Password?"
@@ -216,7 +217,7 @@ KV = """
 
             Widget:
                 size_hint_y: None
-                height: dp(30)
+                height: dp(195)
 """
 
 Builder.load_string(KV)

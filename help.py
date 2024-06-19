@@ -2,6 +2,8 @@ from kivy.lang import Builder
 from kivymd.uix.screen import Screen
 from kivy.base import EventLoop
 from kivy.core.window import Window
+from kivy.factory import Factory
+# from symbol import factor
 KV = '''
 <HelpScreen>:
     Screen:
@@ -31,7 +33,7 @@ KV = '''
 
                             OneLineIconListItem:
                                 text: "Contact Us"
-                                on_release: root.manager.nav_contactus()
+                                on_release: root.nav_contactus()
                                 IconLeftWidget:
                                     icon: "email-outline"
                                     theme_text_color: 'Custom'
@@ -54,14 +56,13 @@ Builder.load_string(KV)
 
 class HelpScreen(Screen):
     def go_back(self):
-        # existing_screen = self.manager.get_screen('help')
+        self.manager.add_widget(Factory.DashBoardScreen(name='dashboard'))
         self.manager.current = 'dashboard'
-        # self.manager.remove_widget(existing_screen)
+        
 
     def __init__(self, **kwargs):
         super(HelpScreen, self).__init__(**kwargs)
         EventLoop.window.bind(on_keyboard=self.on_key)
-        # lambda x: Window.bind(on_keyboard=self.on_key)
 
     def on_key(self, window, key, scancode, codepoint, modifier):
         # 27 is the key code for the back button on Android
@@ -71,6 +72,7 @@ class HelpScreen(Screen):
         return False
 
     def nav_contactus(self):
+        self.manager.add_widget(Factory.ContactUsScreen(name='contactus'))
         self.manager.current = 'contactus'    
 
     

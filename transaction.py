@@ -1,7 +1,7 @@
 from kivy.lang import Builder
 from kivymd.uix.button import MDFlatButton,MDIconButton
 from kivymd.uix.screen import Screen
-from kivy.properties import DictProperty
+from kivy.properties import DictProperty,StringProperty
 from kivy.base import EventLoop
 from anvil.tables import app_tables
 from kivy.storage.jsonstore import JsonStore
@@ -15,10 +15,13 @@ from kivy.uix.widget import Widget
 from kivymd.material_resources import dp
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import MDList
-from datetime import date
+from datetime import date,datetime
 from kivymd.uix.pickers import MDDatePicker
 from kivymd.uix.label import MDIcon
 from kivy.uix.anchorlayout import AnchorLayout
+import tempfile
+from kivy.uix.image import Image
+from kivymd.uix.card import MDSeparator
 KV = '''
 <Transaction>:
     Screen:
@@ -53,13 +56,79 @@ KV = '''
                     effect_kludge: True
                     MDList:
                         id: transaction_list
-
+            # MDBoxLayout:
+            #     size_hint_y: None
+            #     height: '80dp'
+    
+            #     canvas.before:
+            #         Color:
+            #             rgba: (0.078,0.557,0.996,1)
+            #         RoundedRectangle:
+            #             size: self.size
+            #             pos: self.pos
+            #             radius: [40, 40, 0, 0]
+                        
+            #     MDGridLayout:
+    
+            #         cols:5
+    
+            #         spacing:'30dp'
+            #         padding: '20dp'
+            #         pos_hint:{"center_x":0.5}
+            #         size_hint:None,None
+            #         width:self.parent.width
+            #         md_bg_color:
+    
+            #         MDIconButton:
+            #             id:wallet_icon
+            #             icon: 'wallet'
+            #             theme_text_color:"Custom"
+            #             text_color: root.get_button_color('wallet')
+            #             icon_size:"40dp"
+            #             size_hint: (0.1, 0.1)
+            #             on_release:root.nav_your_wallet()
+    
+    
+    
+            #         MDIconButton:
+            #             icon: 'history'
+            #             theme_text_color:"Custom"
+            #             text_color: root.get_button_color('transaction')
+            #             icon_size:"40dp"
+            #             size_hint: (0.1, 0.1)
+            #             on_release:root.nav_your_transaction_history()
+    
+    
+            #         MDIconButton:
+            #             icon: 'qrcode-scan'
+            #             theme_text_color:"Custom"
+            #             text_color: root.get_button_color('qr')
+            #             icon_size:"40dp"
+            #             size_hint: (0.1, 0.1)
+            #             on_release:root.nav_qr_scan()
+    
+            #         MDIconButton:
+            #             icon: 'contacts'
+            #             theme_text_color:"Custom"
+            #             text_color: root.get_button_color('addphone')
+            #             icon_size:"40dp"
+            #             size_hint: (0.1, 0.1)
+            #             on_release:root.nav_your_pay_contacts()
+    
+            #         MDIconButton:
+            #             icon: 'account-circle'
+            #             theme_text_color:"Custom"
+            #             icon_size:"40dp"
+            #             text_color: root.get_button_color('profile')
+            #             size_hint: (0.1, 0.1)
+            #             on_release:root.nav_your_profile()
 
 '''
 Builder.load_string(KV)
 
 
 class Transaction(Screen):
+    # current_page = StringProperty('transaction')
     # filter_dialog = ObjectProperty(None)
     def go_back(self):
         existing_screen = self.manager.get_screen('transaction')
@@ -187,7 +256,7 @@ class Transaction(Screen):
     def type_filter_credit(self,type):
         self.type_filt_credit = type.text
         self.credit_type_add = type
-        print(self.type_filt_credit)
+        print('transaction',self.type_filt_credit)
         if hasattr(type, 'selected') and type.selected:
             type.bg_color = (0,0,0,0)
             type.selected = False
@@ -217,8 +286,7 @@ class Transaction(Screen):
 
     def type_filter_debit(self,type):
         self.type_filt_debit = type.text
-        print(self.type_filt_debit)
-        self.debit_type_add=type
+        print('transaction',self.type_filt_debit)
         if hasattr(type, 'selected') and type.selected:
             print('yes inside slected')
             type.bg_color = (0,0,0,0)
@@ -227,7 +295,6 @@ class Transaction(Screen):
         else:
             print('yes not selected')
             type.bg_color = '#148efe'
-            type.selected = True
         
     
     
@@ -308,6 +375,12 @@ class Transaction(Screen):
                 fund_currency = f"{transaction['users_transaction_currency']}"
                 lowered_currency = fund_currency.lower()
                 fund_currency1 = f"currency-{lowered_currency}"
+                transaction_datetime_obj = str(transaction_datetime).split(" ")
+                transaction_time = str(transaction_datetime_obj[1]).split(".")
+                transaction_time = transaction_time[0]
+                time_obj = datetime.strptime(transaction_time, "%H:%M:%S")
+                am_pm = "AM" if time_obj.hour < 12 else "PM"
+                formatted_time = time_obj.strftime("%I:%M: ") + am_pm
                 # if transaction['']
                 if transaction_date != current_date :
                     
@@ -317,35 +390,88 @@ class Transaction(Screen):
                                             text_color=[0, 0, 0, 1], divider=None, bg_color="#e5f3ff", )
 
                     self.ids.transaction_list.add_widget(list1)
-                
-                transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(36))
+                main_container = BoxLayout(orientation='vertical', size_hint_y=None, height=dp(46))
+                timing_label = MDLabel(text=f"{formatted_time}", font_style="Caption", pos_hint={"center_x": 0.62})
+                transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(46))
 
                 # Add transaction details
-                if transaction['users_transaction_type'] == 'Withdrawn' or transaction['users_transaction_type'] == 'Deposited':
-                    print('inside cond')
-                    uer = app_tables.wallet_users.get(users_phone = phone)
-                    transactions_text = uer['users_username']
+                if transaction['users_transaction_type'] == 'Withdrawn' :
+                    # print('inside cond')
+                    # uer = app_tables.wallet_users.get(users_phone = phone)
+                    transactions_text = 'Withdrawn'
+                
+                if transaction['users_transaction_type'] == 'Deposited':
+                    transactions_text = 'Deposit'
+                if transaction['users_transaction_type'] == 'Auto Topup':
+                    transactions_text = 'Auto topup'
+
                 if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Debit':
                     user = app_tables.wallet_users.get(users_phone = transaction['users_transaction_receiver_phone'] )
+                    print('yeshere',transaction['users_transaction_receiver_phone'])
                     transactions_text = user['users_username']
+                
+                
+                    #ids.user_image.texture = core_image.texture
+                imagee = Image(size_hint_y=None,height='44dp',size_hint_x=None,width='30dp',pos_hint={'center_x':0.5})
+                if transaction['users_transaction_type'] == 'Withdrawn' or transaction['users_transaction_type'] == 'Deposited' or transaction['users_transaction_type'] == 'Auto Topup':
+                    details = app_tables.wallet_users.get(users_phone = phone)
+                    print(phone)
+                    try:
+                        if details['users_profile_pic'] is not None:
+                            print('coming')
+                            decoded_image_bytes =details['users_profile_pic'].get_bytes()
+                            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
+                                temp_file_path = temp_file1.name
+                                # Write the decoded image data to the temporary file
+                                temp_file1.write(decoded_image_bytes)
+                                # Close the file to ensure the data is flushed and saved
+                                temp_file1.close()
+                            imagee.source=temp_file_path
+                        else:
+                            imagee.source='images/user.png'
+                    except Exception as e:
+                        print(e)
+
+                elif transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Debit':
+                    details = app_tables.wallet_users.get(users_phone = transaction['users_transaction_receiver_phone'])
+                    try:
+                        if details['users_profile_pic'] is not None:
+                            print('coming')
+                            decoded_image_bytes =details['users_profile_pic'].get_bytes()
+                            decoded_image_bytes =details['users_profile_pic'].get_bytes()
+                            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
+                                temp_file_path = temp_file1.name
+                                # Write the decoded image data to the temporary file
+                                temp_file1.write(decoded_image_bytes)
+                                # Close the file to ensure the data is flushed and saved
+                                temp_file1.close()
+                            imagee.source=temp_file_path
+                        else:
+                            imagee.source='images/user.png'
+                    except Exception as e:
+                        print(e)
+
                 transaction_item_widget = OneLineListItem(text=f"{transactions_text}", theme_text_color='Custom',
                                                         text_color=[0, 0, 0, 1], divider=None)
+                
+
+                transaction_container.add_widget(imagee)
                 transaction_container.add_widget(transaction_item_widget)
 
                 transaction_container.add_widget(Widget(size_hint_x=None, width=dp(20)))
 
-                if transaction['users_transaction_type'] == 'Credit':
+                if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Deposited' or transaction['users_transaction_type'] == 'Auto Topup':
                     fund_color = [0, 0.5, 0, 1]
                     sign = '+'
-                elif transaction['users_transaction_type'] == 'Deposited':
-                    fund_color = [0, 0.5, 0, 1]
-                    sign = '+'
+                # elif transaction['users_transaction_type'] == 'Debit' or :
+                #     fund_color = [0, 0.5, 0, 1]
+                #     sign = '+'
                 else:
                     fund_color = [1, 0, 0, 1]
                     sign = '-'
 
                 icon = MDIcon(icon=fund_currency1, theme_text_color='Custom', text_color=fund_color,
-                                    size_hint=(None, None), size=(dp(5), dp(5)), pos_hint={'center_y': 0.5, 'top': 0.7})
+                                    size_hint=(None, None), size=(dp(5), dp(5)), pos_hint={'center_y': 0.5, })
                         
                 sign_label =  MDLabel(text=f"{sign}", theme_text_color='Custom', text_color=fund_color,
                                     halign='right')
@@ -355,7 +481,11 @@ class Transaction(Screen):
                 transaction_container.add_widget(sign_label)
                 transaction_container.add_widget(icon)
                 transaction_container.add_widget(fund_label)
-                self.ids.transaction_list.add_widget(transaction_container)
+                main_container.add_widget(transaction_container)
+                main_container.add_widget(timing_label)
+                self.ids.transaction_list.add_widget(main_container)
+                self.ids.transaction_list.add_widget(Widget(size_hint_y=None,height=dp(10)))
+                self.ids.transaction_list.add_widget(MDSeparator(height = dp(1)))
         except Exception as e:
             print(f"Error getting transaction history: {e} ,{traceback.format_exc()}")
             self.manager.show_notification('Alert!','An error occurred. Please try again.')
@@ -383,40 +513,93 @@ class Transaction(Screen):
                         lowered_currency = fund_currency.lower()
                         fund_currency1 = f"currency-{lowered_currency}"
                         print(fund_text,transaction_date_str)
+                        transaction_datetime_obj = str(transaction_datetime).split(" ")
+                        transaction_time = str(transaction_datetime_obj[1]).split(".")
+                        transaction_time = transaction_time[0]
+                        time_obj = datetime.strptime(transaction_time, "%H:%M:%S")
+                        am_pm = "AM" if time_obj.hour < 12 else "PM"
+                        formatted_time = time_obj.strftime("%I:%M: ") + am_pm
                         # if transaction_date != current_date:
                         #     current_date = transaction_date
                             
-
-                        transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(36))
+                        main_container = BoxLayout(orientation='vertical', size_hint_y=None, height=dp(46))
+                        timing_label = MDLabel(text=f"{formatted_time}", font_style="Caption", pos_hint={"center_x": 0.62})
+                        transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(46))
 
                         # Add transaction details
-                        if transaction['users_transaction_type'] == 'Withdrawn' or transaction['users_transaction_type'] == 'Deposited':
-                            print('inside cond')
-                            uer = app_tables.wallet_users.get(users_phone = phone)
-                            transactions_text = uer['users_username']
+                        
+                        if transaction['users_transaction_type'] == 'Withdrawn' :
+                            transactions_text = 'Withdrawn'
+                            
+                        if transaction['users_transaction_type'] == 'Deposited':
+                            transactions_text = 'Deposit'
+
+                        if transaction['users_transaction_type'] == 'Auto Topup':
+                            transactions_text = 'Auto topup'
+
+
                         if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Debit':
                             user = app_tables.wallet_users.get(users_phone = transaction['users_transaction_receiver_phone'] )
                             transactions_text = user['users_username']
+                            print(transaction['users_transaction_receiver_phone'])
+
                         if transaction_date_str == str(self.start_date):
                             print('yes inside')
+                            imagee = Image(size_hint_y=None,height='44dp',size_hint_x=None,width='30dp',pos_hint={'center_x':0.5})
+                            if transaction['users_transaction_type'] == 'Withdrawn' or transaction['users_transaction_type'] == 'Deposited' or transaction['users_transaction_type'] == 'Auto Topup':
+                                details = app_tables.wallet_users.get(users_phone = phone)
+                                try:
+                                    if details['users_profile_pic'] is not None:
+                                        print('coming')
+                                        decoded_image_bytes =details['users_profile_pic'].get_bytes()
+                                        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
+                                            temp_file_path = temp_file1.name
+                                            # Write the decoded image data to the temporary file
+                                            temp_file1.write(decoded_image_bytes)
+                                            # Close the file to ensure the data is flushed and saved
+                                            temp_file1.close()
+                                        imagee.source=temp_file_path
+                                    else:
+                                        imagee.source='images/user.png'
+                                except Exception as e:
+                                    print(e)
+
+                            if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Debit':
+                                details = app_tables.wallet_users.get(users_phone = transaction['users_transaction_receiver_phone'])
+                                try:
+                                    if details['users_profile_pic'] is not None:
+                                        decoded_image_bytes =details['users_profile_pic'].get_bytes()
+                                        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
+                                            temp_file_path = temp_file1.name
+                                            # Write the decoded image data to the temporary file
+                                            temp_file1.write(decoded_image_bytes)
+                                            # Close the file to ensure the data is flushed and saved
+                                            temp_file1.close()
+                                        imagee.source=temp_file_path
+                                    else:
+                                        imagee.source='images/user.png'
+                                except Exception as e:
+                                    print(e)
+
                             transaction_item_widget = OneLineListItem(text=f"{transactions_text}", theme_text_color='Custom',
                                                                     text_color=[0, 0, 0, 1], divider=None)
+                            transaction_container.add_widget(imagee)
                             transaction_container.add_widget(transaction_item_widget)
 
                             transaction_container.add_widget(Widget(size_hint_x=None, width=dp(20)))
 
-                            if transaction['users_transaction_type'] == 'Credit':
+                            if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Deposited' or transaction['users_transaction_type'] == 'Auto Topup':
                                 fund_color = [0, 0.5, 0, 1]
                                 sign = '+'
-                            elif transaction['users_transaction_type'] == 'Deposited':
-                                fund_color = [0, 0.5, 0, 1]
-                                sign = '+'
+                            # elif transaction['users_transaction_type'] == 'Debit' or :
+                            #     fund_color = [0, 0.5, 0, 1]
+                            #     sign = '+'
                             else:
                                 fund_color = [1, 0, 0, 1]
                                 sign = '-'
 
                             icon = MDIcon(icon=fund_currency1, theme_text_color='Custom', text_color=fund_color,
-                                            size_hint=(None, None), size=(dp(5), dp(5)), pos_hint={'center_y': 0.5, 'top': 0.7})
+                                            size_hint=(None, None), size=(dp(5), dp(5)), pos_hint={'center_y': 0.5})
                                 
                             sign_label =  MDLabel(text=f"{sign}", theme_text_color='Custom', text_color=fund_color,
                                                 halign='right')
@@ -426,7 +609,11 @@ class Transaction(Screen):
                             transaction_container.add_widget(sign_label)
                             transaction_container.add_widget(icon)
                             transaction_container.add_widget(fund_label)
-                            self.ids.transaction_list.add_widget(transaction_container)
+                            main_container.add_widget(transaction_container)
+                            main_container.add_widget(timing_label)
+                            self.ids.transaction_list.add_widget(main_container)
+                            self.ids.transaction_list.add_widget(Widget(size_hint_y=None,height=dp(10)))
+                            self.ids.transaction_list.add_widget(MDSeparator(height = dp(1)))
                 if self.start_date != self.end_date:
                     transactions = list(app_tables.wallet_users_transaction.search(**filters))
                     self.ids.transaction_list.clear_widgets()
@@ -442,7 +629,12 @@ class Transaction(Screen):
                         fund_currency = f"{transaction['users_transaction_currency']}"
                         lowered_currency = fund_currency.lower()
                         fund_currency1 = f"currency-{lowered_currency}"
-
+                        transaction_datetime_obj = str(transaction_datetime).split(" ")
+                        transaction_time = str(transaction_datetime_obj[1]).split(".")
+                        transaction_time = transaction_time[0]
+                        time_obj = datetime.strptime(transaction_time, "%H:%M:%S")
+                        am_pm = "AM" if time_obj.hour < 12 else "PM"
+                        formatted_time = time_obj.strftime("%I:%M: ") + am_pm
                         if str(self.start_date) <= transaction_date_str <= str(self.end_date):
                             if transaction_date != current_date:
                                 current_date = transaction_date
@@ -452,35 +644,81 @@ class Transaction(Screen):
 
                                 self.ids.transaction_list.add_widget(list1)
 
-                            transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(36))
+                            main_container = BoxLayout(orientation='vertical', size_hint_y=None, height=dp(46))
+                            timing_label = MDLabel(text=f"{formatted_time}", font_style="Caption", pos_hint={"center_x": 0.62})
+                            transaction_container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(46))
 
                             # Add transaction details
-                            if transaction['users_transaction_type'] == 'Withdrawn' or transaction['users_transaction_type'] == 'Deposited':
-                                print('inside cond')
-                                uer = app_tables.wallet_users.get(users_phone = phone)
-                                transactions_text = uer['users_username']
+                            
+                            if transaction['users_transaction_type'] == 'Withdrawn' :
+                                transactions_text = 'Withdrawn'
+                                
+                            if transaction['users_transaction_type'] == 'Deposited':
+                                transactions_text = 'Deposit'
+
+                            if transaction['users_transaction_type'] == 'Auto Topup':
+                                transactions_text = 'Auto topup'
+                            
+
                             if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Debit':
                                 user = app_tables.wallet_users.get(users_phone = transaction['users_transaction_receiver_phone'] )
                                 transactions_text = user['users_username']
+                                print(transaction['users_transaction_receiver_phone'])
+
                             if str(self.start_date) <= transaction_date_str <= str(self.end_date):
+                                imagee = Image(size_hint_y=None,height='44dp',size_hint_x=None,width='30dp',pos_hint={'center_x':0.5})
+                                try:
+                                    if transaction['users_transaction_type'] == 'Withdrawn' or transaction['users_transaction_type'] == 'Deposited' or transaction['users_transaction_type'] == 'Auto Topup':
+                                        details = app_tables.wallet_users.get(users_phone = phone)
+                                        if details['users_profile_pic'] is not None:
+                                            decoded_image_bytes =details['users_profile_pic'].get_bytes()
+                                            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
+                                                temp_file_path = temp_file1.name
+                                                # Write the decoded image data to the temporary file
+                                                temp_file1.write(decoded_image_bytes)
+                                                # Close the file to ensure the data is flushed and saved
+                                                temp_file1.close()
+                                            imagee.source=temp_file_path
+                                        else:
+                                            imagee.source='images/user.png'
+                                except Exception as e:
+                                    print(e)
+
+                                if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Debit':
+                                    details = app_tables.wallet_users.get(users_phone = transaction['users_transaction_receiver_phone'])
+                                    try:
+                                        if details['users_profile_pic'] is not None:
+                                            decoded_image_bytes =details['users_profile_pic'].get_bytes()
+                                            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file1:
+                                                temp_file_path = temp_file1.name
+                                                # Write the decoded image data to the temporary file
+                                                temp_file1.write(decoded_image_bytes)
+                                                # Close the file to ensure the data is flushed and saved
+                                                temp_file1.close()
+                                            imagee.source=temp_file_path
+                                        else:
+                                            imagee.source='images/user.png'
+                                    except Exception as e:
+                                        print(e)
                                 transaction_item_widget = OneLineListItem(text=f"{transactions_text}", theme_text_color='Custom',
                                                                         text_color=[0, 0, 0, 1], divider=None)
+                                transaction_container.add_widget(imagee)
                                 transaction_container.add_widget(transaction_item_widget)
 
                                 transaction_container.add_widget(Widget(size_hint_x=None, width=dp(20)))
 
-                                if transaction['users_transaction_type'] == 'Credit':
+                                if transaction['users_transaction_type'] == 'Credit' or transaction['users_transaction_type'] == 'Deposited' or transaction['users_transaction_type'] == 'Auto Topup':
                                     fund_color = [0, 0.5, 0, 1]
                                     sign = '+'
-                                elif transaction['users_transaction_type'] == 'Deposited':
-                                    fund_color = [0, 0.5, 0, 1]
-                                    sign = '+'
+                                # elif transaction['users_transaction_type'] == 'Debit' or :
+                                #     fund_color = [0, 0.5, 0, 1]
+                                #     sign = '+'
                                 else:
                                     fund_color = [1, 0, 0, 1]
                                     sign = '-'
 
                                 icon = MDIcon(icon=fund_currency1, theme_text_color='Custom', text_color=fund_color,
-                                            size_hint=(None, None), size=(dp(5), dp(5)), pos_hint={'center_y': 0.5, 'top': 0.7})
+                                            size_hint=(None, None), size=(dp(5), dp(5)), pos_hint={'center_y': 0.5})
                                 
                                 sign_label =  MDLabel(text=f"{sign}", theme_text_color='Custom', text_color=fund_color,
                                                     halign='right')
@@ -490,11 +728,42 @@ class Transaction(Screen):
                                 transaction_container.add_widget(sign_label)
                                 transaction_container.add_widget(icon)
                                 transaction_container.add_widget(fund_label)
-                                self.ids.transaction_list.add_widget(transaction_container)
+                                main_container.add_widget(transaction_container)
+                                main_container.add_widget(timing_label)
+                                self.ids.transaction_list.add_widget(main_container)
+                                self.ids.transaction_list.add_widget(Widget(size_hint_y=None,height=dp(10)))
+                                self.ids.transaction_list.add_widget(MDSeparator(height = dp(1)))
             except Exception as e:
                 print(f"Error getting transaction history: {e} ,{traceback.format_exc()}")
                 self.manager.show_notification('Alert!','An error occurred. Please try again.')
 
+    # def get_button_color(self, page):
+    #     return (0, 0, 0, 0.7) if self.current_page == page else (1, 1, 1, 1)
+
+    # def nav_your_wallet(self):
+    #     self.manager.add_widget(Factory.AddMoneyScreen(name='addmoney'))
+    #     self.manager.current = 'addmoney'
+    #     self.current_page = 'wallet'
+
+    # def nav_your_transaction_history(self):
+    #     self.manager.add_widget(Factory.Transaction(name='transaction'))
+    #     self.manager.current = 'transaction'
+    #     self.current_page = 'transaction'
+
+    # def nav_qr_scan(self):
+    #     self.manager.add_widget(Factory.ScanScreen(name='qrscanner'))
+    #     self.manager.current = 'qrscanner'
+    #     self.current_page = 'qr'
+
+    # def nav_your_pay_contacts(self):
+    #     self.manager.add_widget(Factory.AddPhoneScreen(name='addphone'))
+    #     self.manager.current = 'addphone'
+    #     self.current_page = 'addphone'
+
+    # def nav_your_profile(self):
+    #     self.manager.add_widget(Factory.Profile(name='profile'))
+    #     self.manager.current = 'profile'
+    #     self.current_page = 'profile'
     #transaction history by date
     # def get_transaction_history_date(self,**args):
     #     store = JsonStore('user_data.json').get('user')['value']
